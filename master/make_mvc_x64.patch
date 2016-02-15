@@ -1,0 +1,60 @@
+# HG changeset patch
+# User sgur <sgurrr@gmail.com>
+# Date 1384735764 -32400
+#      Mon Nov 18 09:49:24 2013 +0900
+# Node ID 3703cd049603a6fe307a6495ee9b1a2a72200265
+# Parent  29a8444526f074041d673945f3755d08c652f7d5
+imported patch make_mvc_x64.patch
+
+diff --git a/src/Make_mvc.mak b/src/Make_mvc.mak
+index 887c2ec..eaae63c 100644
+--- a/src/Make_mvc.mak
++++ b/src/Make_mvc.mak
+@@ -178,6 +178,9 @@ OBJDIR = $(OBJDIR)X
+ !if "$(OLE)" == "yes"
+ OBJDIR = $(OBJDIR)O
+ !endif
++!if "$(AVX)" == "yes"
++OBJDIR = $(OBJDIR)A
++!endif
+ !ifdef LUA
+ OBJDIR = $(OBJDIR)U
+ !endif
+@@ -440,6 +443,11 @@ CPUARG =
+ # VC8/9/10 only allows specifying SSE architecture but only for 32bit
+ !if "$(ASSEMBLY_ARCHITECTURE)" == "i386" && "$(CPUNR)" == "pentium4"
+ CPUARG = /arch:SSE2
++!elseif "$(CPUNR)" == "intel64"
++CPUARG = /favor:INTEL64
++!endif
++!if "$(AVX)" == "yes"
++CPUARG = $(CPUARG) /arch:AVX
+ !endif
+ !endif
+ 
+@@ -460,13 +468,13 @@ OPTFLAG = /O1
+ !elseif "$(OPTIMIZE)" == "SPEED"
+ OPTFLAG = /O2
+ !else # MAXSPEED
+-OPTFLAG = /Ox
++OPTFLAG = /Ox /fp:fast
+ !endif
+ 
+ !if $(MSVC_MAJOR) >= 8
+ # Use link time code generation if not worried about size
+ !if "$(OPTIMIZE)" != "SPACE"
+-OPTFLAG = $(OPTFLAG) /GL
++OPTFLAG = $(OPTFLAG) /GL /GA /Gy
+ !endif
+ !endif
+ 
+@@ -991,6 +999,9 @@ LINKARGS2 = $(CON_LIB) $(GUI_LIB) $(NODEFAULTLIB) $(LIBC) $(OLE_LIB) user32.lib
+ !if $(MSVC_MAJOR) >= 8
+ !if "$(OPTIMIZE)" != "SPACE"
+ LINKARGS1 = $(LINKARGS1) /LTCG:STATUS
++!if "$(CPUNR)" == "intel64"
++LINKARGS1 = $(LINKARGS1) /OPT:REF,ICF
++!endif
+ !endif
+ !endif
+ !endif
