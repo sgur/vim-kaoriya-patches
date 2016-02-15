@@ -2,20 +2,21 @@
 # Parent 3707ea421d58321d823956563eb9c4524b1eab3b
 # Parent  2e92269ec226fe8c45d73226fe3ebc7b0aba816f
 
-diff -r 2e92269ec226 runtime/doc/eval.txt
---- a/runtime/doc/eval.txt	Sat Jul 04 11:24:53 2015 +0900
-+++ b/runtime/doc/eval.txt	Sat Jul 04 11:25:00 2015 +0900
-@@ -1711,6 +1711,8 @@
+diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
+index 63438c9..f64801b 100644
+--- a/runtime/doc/eval.txt
++++ b/runtime/doc/eval.txt
+@@ -1781,6 +1781,8 @@ USAGE				RESULT	DESCRIPTION	~
  abs( {expr})			Float or Number  absolute value of {expr}
  acos( {expr})			Float	arc cosine of {expr}
  add( {list}, {item})		List	append {item} to |List| {list}
 +alcget( )			Dict	get copy |Dict| of autoload cache
 +alcreset( )			none	reset autoload cache
+ alloc_fail( {id}, {countdown}, {repeat})
+ 				none	make memory allocation fail
  and( {expr}, {expr})		Number  bitwise AND
- append( {lnum}, {string})	Number	append {string} below line {lnum}
- append( {lnum}, {list})		Number	append lines {list} below line {lnum}
-@@ -2089,6 +2091,16 @@
- 		Use |insert()| to add an item at another position.
+@@ -2189,6 +2191,16 @@ alloc_fail({id}, {countdown}, {repeat})			*alloc_fail()*
+ 		smaller than one it fails one time.
  
  
 +alcget()						*alcget()*
@@ -31,10 +32,11 @@ diff -r 2e92269ec226 runtime/doc/eval.txt
  and({expr}, {expr})					*and()*
  		Bitwise AND on the two arguments.  The arguments are converted
  		to a number.  A List, Dict or Float argument causes an error.
-diff -r 2e92269ec226 src/eval.c
---- a/src/eval.c	Sat Jul 04 11:24:53 2015 +0900
-+++ b/src/eval.c	Sat Jul 04 11:25:00 2015 +0900
-@@ -124,6 +124,12 @@
+diff --git a/src/eval.c b/src/eval.c
+index 13befab..a9214f4 100644
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -125,6 +125,12 @@ static dictitem_T	globvars_var;		/* variable used for g: */
   */
  static hashtab_T	compat_hashtab;
  
@@ -47,24 +49,24 @@ diff -r 2e92269ec226 src/eval.c
  /*
   * When recursively copying lists and dicts we need to remember which ones we
   * have done to avoid endless recursiveness.  This unique ID is used for that.
-@@ -471,6 +477,8 @@
- static void f_acos __ARGS((typval_T *argvars, typval_T *rettv));
+@@ -469,6 +475,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
+ static void f_acos(typval_T *argvars, typval_T *rettv);
  #endif
- static void f_add __ARGS((typval_T *argvars, typval_T *rettv));
-+static void f_alcget __ARGS((typval_T *argvars, typval_T *rettv));
-+static void f_alcreset __ARGS((typval_T *argvars, typval_T *rettv));
- static void f_and __ARGS((typval_T *argvars, typval_T *rettv));
- static void f_append __ARGS((typval_T *argvars, typval_T *rettv));
- static void f_argc __ARGS((typval_T *argvars, typval_T *rettv));
-@@ -885,6 +893,7 @@
+ static void f_add(typval_T *argvars, typval_T *rettv);
++static void f_alcget(typval_T *argvars, typval_T *rettv);
++static void f_alcreset(typval_T *argvars, typval_T *rettv);
+ static void f_alloc_fail(typval_T *argvars, typval_T *rettv);
+ static void f_and(typval_T *argvars, typval_T *rettv);
+ static void f_append(typval_T *argvars, typval_T *rettv);
+@@ -914,6 +922,7 @@ eval_init(void)
      init_var_dict(&vimvardict, &vimvars_var, VAR_SCOPE);
      vimvardict.dv_lock = VAR_FIXED;
      hash_init(&compat_hashtab);
 +    hash_init(&autoload_cache);
      hash_init(&func_hashtab);
- #if defined(FEAT_JOB_BASE) && defined(FEAT_JOB_EVAL)
-     init_var_dict(&jobvardict, &jobvars_var);
-@@ -946,6 +955,8 @@
+ 
+     for (i = 0; i < VV_LEN; ++i)
+@@ -981,6 +990,8 @@ eval_clear(void)
      hash_init(&vimvarht);  /* garbage_collect() will access it */
      hash_clear(&compat_hashtab);
  
@@ -73,16 +75,16 @@ diff -r 2e92269ec226 src/eval.c
      free_scriptnames();
  # if defined(FEAT_CMDL_COMPL)
      free_locales();
-@@ -8082,6 +8093,8 @@
+@@ -8076,6 +8087,8 @@ static struct fst
      {"acos",		1, 1, f_acos},	/* WJMc */
  #endif
      {"add",		2, 2, f_add},
 +    {"alcget",		0, 0, f_alcget},
 +    {"alcreset",	0, 0, f_alcreset},
+     {"alloc_fail",	3, 3, f_alloc_fail},
      {"and",		2, 2, f_and},
      {"append",		2, 2, f_append},
-     {"argc",		0, 0, f_argc},
-@@ -23661,6 +23674,215 @@
+@@ -24019,6 +24032,215 @@ prof_self_cmp(const void *s1, const void *s2)
  #endif
  
  /*
@@ -168,7 +170,7 @@ diff -r 2e92269ec226 src/eval.c
 +    }
 +}
 +
-+static void autoload_cache_add_callback __ARGS((char_u *fname, void *cookie));
++static void autoload_cache_add_callback(char_u *fname, void *cookie);
 +
 +/*
 + * Glue function between do_in_runtimepath() and autoload_cache_add().
@@ -298,7 +300,7 @@ diff -r 2e92269ec226 src/eval.c
   * If "name" has a package name try autoloading the script for it.
   * Return TRUE if a package was loaded.
   */
-@@ -23673,6 +23895,7 @@
+@@ -24031,6 +24253,7 @@ script_autoload(
      char_u	*scriptname, *tofree;
      int		ret = FALSE;
      int		i;
@@ -306,7 +308,7 @@ diff -r 2e92269ec226 src/eval.c
  
      /* If there is no '#' after name[0] there is no package name. */
      p = vim_strchr(name, AUTOLOAD_CHAR);
-@@ -23698,7 +23921,8 @@
+@@ -24056,7 +24279,8 @@ script_autoload(
  	}
  
  	/* Try loading the package from $VIMRUNTIME/autoload/<name>.vim */
@@ -316,10 +318,11 @@ diff -r 2e92269ec226 src/eval.c
  	    ret = TRUE;
      }
  
-diff -r 2e92269ec226 src/option.c
---- a/src/option.c	Sat Jul 04 11:24:53 2015 +0900
-+++ b/src/option.c	Sat Jul 04 11:25:00 2015 +0900
-@@ -7114,6 +7114,14 @@
+diff --git a/src/option.c b/src/option.c
+index d781f01..3f86a6f 100644
+--- a/src/option.c
++++ b/src/option.c
+@@ -7207,6 +7207,14 @@ did_set_string_option(
      }
  #endif
  
@@ -334,14 +337,15 @@ diff -r 2e92269ec226 src/option.c
      /* Options that are a list of flags. */
      else
      {
-diff -r 2e92269ec226 src/proto/eval.pro
---- a/src/proto/eval.pro	Sat Jul 04 11:24:53 2015 +0900
-+++ b/src/proto/eval.pro	Sat Jul 04 11:25:00 2015 +0900
-@@ -114,6 +114,7 @@
- char_u *get_expanded_name __ARGS((char_u *name, int check));
- void func_dump_profile __ARGS((FILE *fd));
- char_u *get_user_func_name __ARGS((expand_T *xp, int idx));
-+void autoload_cache_clear __ARGS((void));
- void ex_delfunction __ARGS((exarg_T *eap));
- void func_unref __ARGS((char_u *name));
- void func_ref __ARGS((char_u *name));
+diff --git a/src/proto/eval.pro b/src/proto/eval.pro
+index d1f5c3c..0e2f5f6 100644
+--- a/src/proto/eval.pro
++++ b/src/proto/eval.pro
+@@ -122,6 +122,7 @@ int translated_function_exists(char_u *name);
+ char_u *get_expanded_name(char_u *name, int check);
+ void func_dump_profile(FILE *fd);
+ char_u *get_user_func_name(expand_T *xp, int idx);
++void autoload_cache_clear(void);
+ void ex_delfunction(exarg_T *eap);
+ void func_unref(char_u *name);
+ void func_ref(char_u *name);
