@@ -1,0 +1,33 @@
+diff --git a/src/Make_ming.mak b/src/Make_ming.mak
+index 9ed1a70..659be93 100644
+--- a/src/Make_ming.mak
++++ b/src/Make_ming.mak
+@@ -11,6 +11,8 @@
+ # Last updated by Ken Takata.
+ # Last Change: 2014 Oct 21
+ 
++STATIC_STDCPLUS=yes
++USE_STDCPLUS=yes
+ 
+ # uncomment 'PERL' if you want a perl-enabled version
+ #PERL=c:/perl
+@@ -33,9 +35,19 @@
+ #PYTHON=/home/ron/ActivePython-2.0.0-202/src/Core
+ # on my NT box, it's here:
+ #PYTHON=c:/python20
++PYTHON_VER=27
++PYTHON=c:/git-sdk-64/mingw64
++PYTHON_HOME=$(PYTHON)
++PYTHONINC=-I$(PYTHON)/include/python2.7
++DYNAMIC_PYTHON_DLL=libpython2.7.dll
+ 
+ # uncomment 'PYTHON3' if you want a python3-enabled version
+ #PYTHON3=c:/python31
++PYTHON3_VER=35
++PYTHON3=c:/git-sdk-64/mingw64
++PYTHON3_HOME=$(PYTHON3)
++PYTHON3INC=-I$(PYTHON3)/include/python3.5m
++DYNAMIC_PYTHON3_DLL=libpython3.5m.dll
+ 
+ # uncomment 'TCL' if you want a Tcl-enabled version
+ #TCL=c:/tcl

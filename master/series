@@ -32,3 +32,4 @@ ambiwidth_fulldouble.diff
 make_mvc_x64.patch
 vim_icon.patch
 gvimext_i18n.patch
+my_make_ming.patch
