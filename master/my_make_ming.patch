@@ -1,3 +1,16 @@
+diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
+index f6ab0db..dc22210 100644
+--- a/src/Make_cyg_ming.mak
++++ b/src/Make_cyg_ming.mak
+@@ -414,7 +414,7 @@ WINDRES_CC = $(CC)
+ #>>>>> end of choices
+ ###########################################################################
+ 
+-CFLAGS = -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall
++CFLAGS = -Iproto $(DEFINES) -pipe -march=native -Wall
+ WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
+ EXTRA_LIBS =
+ 
 diff --git a/src/Make_ming.mak b/src/Make_ming.mak
 index 9ed1a70..659be93 100644
 --- a/src/Make_ming.mak
