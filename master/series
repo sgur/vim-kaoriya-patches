@@ -27,9 +27,10 @@ X012-ynkdir-im_over_the_spot.diff #-no_kaoriya
 X013-721-investigate.diff #+debug
 X014-ex-reverse.diff #+experiments
 0000-kaoriya_marks.diff #-no_kaoriya
-suppress_redraw_completeopt_redraw.patch
-ambiwidth_fulldouble.diff
-make_mvc_x64.patch
 vim_icon.patch
+make_mvc_x64.patch
 gvimext_i18n.patch
 my_make_ming.patch
+suppress_redraw_completeopt_redraw.patch
+ambiwidth_fulldouble.diff
+issue869_fixflicker.patch

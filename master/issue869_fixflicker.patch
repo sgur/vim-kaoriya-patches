@@ -1,0 +1,54 @@
+diff --git a/src/edit.c b/src/edit.c
+index 953b1fd..333f37b 100644
+--- a/src/edit.c
++++ b/src/edit.c
+@@ -2826,7 +2826,6 @@ ins_compl_upd_pum(void)
+     if (compl_match_array != NULL)
+     {
+ 	h = curwin->w_cline_height;
+-	update_screen(0);
+ 	if (h != curwin->w_cline_height)
+ 	    ins_compl_del_pum();
+     }
+@@ -2917,9 +2916,6 @@ ins_compl_show_pum(void)
+     do_cmdline_cmd((char_u *)"if exists('g:loaded_matchparen')|3match none|endif");
+ #endif
+ 
+-    /* Update the screen before drawing the popup menu over it. */
+-    update_screen(0);
+-
+     if (compl_match_array == NULL)
+     {
+ 	/* Need to build the popup menu list. */
+@@ -3029,6 +3025,9 @@ ins_compl_show_pum(void)
+ 	 * part of the screen would be updated.  We do need to redraw here. */
+ 	dollar_vcol = -1;
+ 
++	/* Update the screen before drawing the popup menu over it. */
++	update_screen(0);
++
+ 	/* Compute the screen column of the start of the completed text.
+ 	 * Use the cursor to get all wrapping and other settings right. */
+ 	col = curwin->w_cursor.col;
+@@ -4848,6 +4847,10 @@ ins_compl_next(
+ 
+ 	/* display the updated popup menu */
+ 	ins_compl_show_pum();
++
++	/* Delete old text to be replaced, since we're still searching and
++	 * don't want to match ourselves!  */
++	ins_compl_delete();
+ #ifdef FEAT_GUI
+ 	if (gui.in_use)
+ 	{
+@@ -4857,10 +4860,6 @@ ins_compl_next(
+ 	    gui_update_cursor(FALSE, FALSE);
+ 	}
+ #endif
+-
+-	/* Delete old text to be replaced, since we're still searching and
+-	 * don't want to match ourselves!  */
+-	ins_compl_delete();
+     }
+ 
+     /* Enter will select a match when the match wasn't inserted and the popup
