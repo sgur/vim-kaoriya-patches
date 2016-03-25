@@ -12,7 +12,7 @@ index a6ab3ae..7cbbe43 100644
  WINDRES_CXX = $(CXX)
  WINDRES_FLAGS = --preprocessor="$(WINDRES_CXX) -E -xc" -DRC_INVOKED
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index f6ab0db..6553bf1 100644
+index 62585e9..0a7b295 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
 @@ -414,7 +414,7 @@ WINDRES_CC = $(CC)
@@ -21,10 +21,10 @@ index f6ab0db..6553bf1 100644
  
 -CFLAGS = -Iproto $(DEFINES) -pipe -march=$(ARCH) -Wall
 +CFLAGS = -Iproto $(DEFINES) -pipe -march=native -Wall
+ CXXFLAGS = -std=gnu++11
  WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
  EXTRA_LIBS =
- 
-@@ -578,6 +578,7 @@ else
+@@ -579,6 +579,7 @@ else
  ifeq ($(OPTIMIZE), MAXSPEED)
  CFLAGS += -O3
  CFLAGS += -fomit-frame-pointer -freg-struct-return

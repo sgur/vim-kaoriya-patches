@@ -3,10 +3,10 @@
 # Parent  2e92269ec226fe8c45d73226fe3ebc7b0aba816f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
-index 63438c9..f64801b 100644
+index 642f0ad..b25f4f6 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1781,6 +1781,8 @@ USAGE				RESULT	DESCRIPTION	~
+@@ -1786,6 +1786,8 @@ USAGE				RESULT	DESCRIPTION	~
  abs( {expr})			Float or Number  absolute value of {expr}
  acos( {expr})			Float	arc cosine of {expr}
  add( {list}, {item})		List	append {item} to |List| {list}
@@ -15,7 +15,7 @@ index 63438c9..f64801b 100644
  alloc_fail( {id}, {countdown}, {repeat})
  				none	make memory allocation fail
  and( {expr}, {expr})		Number  bitwise AND
-@@ -2189,6 +2191,16 @@ alloc_fail({id}, {countdown}, {repeat})			*alloc_fail()*
+@@ -2219,6 +2221,16 @@ alloc_fail({id}, {countdown}, {repeat})			*alloc_fail()*
  		smaller than one it fails one time.
  
  
@@ -33,10 +33,10 @@ index 63438c9..f64801b 100644
  		Bitwise AND on the two arguments.  The arguments are converted
  		to a number.  A List, Dict or Float argument causes an error.
 diff --git a/src/eval.c b/src/eval.c
-index 13befab..a9214f4 100644
+index 54cf215..dabffd0 100644
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -125,6 +125,12 @@ static dictitem_T	globvars_var;		/* variable used for g: */
+@@ -122,6 +122,12 @@ static dictitem_T	globvars_var;		/* variable used for g: */
   */
  static hashtab_T	compat_hashtab;
  
@@ -49,7 +49,7 @@ index 13befab..a9214f4 100644
  /*
   * When recursively copying lists and dicts we need to remember which ones we
   * have done to avoid endless recursiveness.  This unique ID is used for that.
-@@ -469,6 +475,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
+@@ -463,6 +469,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
  static void f_acos(typval_T *argvars, typval_T *rettv);
  #endif
  static void f_add(typval_T *argvars, typval_T *rettv);
@@ -58,7 +58,7 @@ index 13befab..a9214f4 100644
  static void f_alloc_fail(typval_T *argvars, typval_T *rettv);
  static void f_and(typval_T *argvars, typval_T *rettv);
  static void f_append(typval_T *argvars, typval_T *rettv);
-@@ -914,6 +922,7 @@ eval_init(void)
+@@ -926,6 +934,7 @@ eval_init(void)
      init_var_dict(&vimvardict, &vimvars_var, VAR_SCOPE);
      vimvardict.dv_lock = VAR_FIXED;
      hash_init(&compat_hashtab);
@@ -66,7 +66,7 @@ index 13befab..a9214f4 100644
      hash_init(&func_hashtab);
  
      for (i = 0; i < VV_LEN; ++i)
-@@ -981,6 +990,8 @@ eval_clear(void)
+@@ -993,6 +1002,8 @@ eval_clear(void)
      hash_init(&vimvarht);  /* garbage_collect() will access it */
      hash_clear(&compat_hashtab);
  
@@ -75,7 +75,7 @@ index 13befab..a9214f4 100644
      free_scriptnames();
  # if defined(FEAT_CMDL_COMPL)
      free_locales();
-@@ -8076,6 +8087,8 @@ static struct fst
+@@ -8139,6 +8150,8 @@ static struct fst
      {"acos",		1, 1, f_acos},	/* WJMc */
  #endif
      {"add",		2, 2, f_add},
@@ -84,7 +84,7 @@ index 13befab..a9214f4 100644
      {"alloc_fail",	3, 3, f_alloc_fail},
      {"and",		2, 2, f_and},
      {"append",		2, 2, f_append},
-@@ -24019,6 +24032,215 @@ prof_self_cmp(const void *s1, const void *s2)
+@@ -24490,6 +24503,215 @@ prof_self_cmp(const void *s1, const void *s2)
  #endif
  
  /*
@@ -300,7 +300,7 @@ index 13befab..a9214f4 100644
   * If "name" has a package name try autoloading the script for it.
   * Return TRUE if a package was loaded.
   */
-@@ -24031,6 +24253,7 @@ script_autoload(
+@@ -24502,6 +24724,7 @@ script_autoload(
      char_u	*scriptname, *tofree;
      int		ret = FALSE;
      int		i;
@@ -308,21 +308,21 @@ index 13befab..a9214f4 100644
  
      /* If there is no '#' after name[0] there is no package name. */
      p = vim_strchr(name, AUTOLOAD_CHAR);
-@@ -24056,7 +24279,8 @@ script_autoload(
+@@ -24527,7 +24750,8 @@ script_autoload(
  	}
  
  	/* Try loading the package from $VIMRUNTIME/autoload/<name>.vim */
--	if (source_runtime(scriptname, FALSE) == OK)
+-	if (source_runtime(scriptname, 0) == OK)
 +	if ((scriptpath = autoload_cache_find(scriptname + 9)) != NULL &&
 +		do_source(scriptpath, FALSE, DOSO_NONE) == OK)
  	    ret = TRUE;
      }
  
 diff --git a/src/option.c b/src/option.c
-index d781f01..3f86a6f 100644
+index 229a49e..3d27a7e 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -7207,6 +7207,14 @@ did_set_string_option(
+@@ -7194,6 +7194,14 @@ did_set_string_option(
      }
  #endif
  
@@ -338,10 +338,10 @@ index d781f01..3f86a6f 100644
      else
      {
 diff --git a/src/proto/eval.pro b/src/proto/eval.pro
-index d1f5c3c..0e2f5f6 100644
+index 1de7a6d..9cbae65 100644
 --- a/src/proto/eval.pro
 +++ b/src/proto/eval.pro
-@@ -122,6 +122,7 @@ int translated_function_exists(char_u *name);
+@@ -129,6 +129,7 @@ int translated_function_exists(char_u *name);
  char_u *get_expanded_name(char_u *name, int check);
  void func_dump_profile(FILE *fd);
  char_u *get_user_func_name(expand_T *xp, int idx);
