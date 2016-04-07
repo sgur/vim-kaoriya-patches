@@ -1,5 +1,5 @@
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index 62585e9..0a7b295 100644
+index 62585e9..1907d14 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
 @@ -414,7 +414,7 @@ WINDRES_CC = $(CC)
@@ -18,6 +18,50 @@ index 62585e9..0a7b295 100644
 +LFLAGS += -Wl,-s
  else  # SPEED
  CFLAGS += -O2
+ endif
+@@ -785,7 +786,8 @@ endif
+ 
+ ifeq (yes, $(USE_STDCPLUS))
+ ifeq (yes, $(STATIC_STDCPLUS))
+-LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++# LIB += -Wl,-Bstatic -lstdc++ -Wl,-Bdynamic
++LIB += -static -lstdc++
+ else
+ LIB += -lstdc++
+ endif
+@@ -797,13 +799,13 @@ vimrun.exe: vimrun.c
+ 	$(CC) $(CFLAGS) -o vimrun.exe vimrun.c $(LIB)
+ 
+ install.exe: dosinst.c
+-	$(CC) $(CFLAGS) -o install.exe dosinst.c $(LIB) -lole32 -luuid
++	$(CC) $(CFLAGS) -o install.exe dosinst.c -lole32 -luuid $(LIB)
+ 
+ uninstal.exe: uninstal.c
+ 	$(CC) $(CFLAGS) -o uninstal.exe uninstal.c $(LIB)
+ 
+ $(TARGET): $(OUTDIR) $(OBJ)
+-	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
++	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) -lole32 -luuid $(LIB) $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
+ 
+ upx: exes
+ 	upx gvim.exe
+@@ -906,7 +908,7 @@ ifneq (sh.exe, $(SHELL))
+ 	@echo 'char_u *default_vim_dir = (char_u *)"$(VIMRCLOC)";' >> pathdef.c
+ 	@echo 'char_u *default_vimruntime_dir = (char_u *)"$(VIMRUNTIMEDIR)";' >> pathdef.c
+ 	@echo 'char_u *all_cflags = (char_u *)"$(CC) $(CFLAGS)";' >> pathdef.c
+-	@echo 'char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)";' >> pathdef.c
++	@echo 'char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) -lole32 -luuid $(LIB) $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)";' >> pathdef.c
+ 	@echo 'char_u *compiled_user = (char_u *)"$(USERNAME)";' >> pathdef.c
+ 	@echo 'char_u *compiled_sys = (char_u *)"$(USERDOMAIN)";' >> pathdef.c
+ else
+@@ -916,7 +918,7 @@ else
+ 	@echo char_u *default_vim_dir = (char_u *)"$(VIMRCLOC)"; >> pathdef.c
+ 	@echo char_u *default_vimruntime_dir = (char_u *)"$(VIMRUNTIMEDIR)"; >> pathdef.c
+ 	@echo char_u *all_cflags = (char_u *)"$(CC) $(CFLAGS)"; >> pathdef.c
+-	@echo char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)"; >> pathdef.c
++	@echo char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) -lole32 -luuid $(LIB) $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)"; >> pathdef.c
+ 	@echo char_u *compiled_user = (char_u *)"$(USERNAME)"; >> pathdef.c
+ 	@echo char_u *compiled_sys = (char_u *)"$(USERDOMAIN)"; >> pathdef.c
  endif
 diff --git a/src/Make_ming.mak b/src/Make_ming.mak
 index 9ed1a70..659be93 100644
