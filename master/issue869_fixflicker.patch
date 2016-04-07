@@ -52,3 +52,34 @@ index 953b1fd..333f37b 100644
      }
  
      /* Enter will select a match when the match wasn't inserted and the popup
+diff --git a/src/popupmnu.c b/src/popupmnu.c
+index 4c3ac70..f128971 100644
+--- a/src/popupmnu.c
++++ b/src/popupmnu.c
+@@ -663,7 +663,7 @@ pum_set_selected(int n, int repeat)
+ 
+ 			/* Return cursor to where we were */
+ 			validate_cursor();
+-			redraw_later(SOME_VALID);
++			redraw_win_later(curwin, REDRAW_TOP);
+ 
+ 			/* When the preview window was resized we need to
+ 			 * update the view on the buffer.  Only go back to
+@@ -680,7 +680,7 @@ pum_set_selected(int n, int repeat)
+ 			/* Update the screen before drawing the popup menu.
+ 			 * Enable updating the status lines. */
+ 			pum_do_redraw = TRUE;
+-			update_screen(0);
++			win_redr_status(curwin);
+ 			pum_do_redraw = FALSE;
+ 
+ 			if (!resized && win_valid(curwin_save))
+@@ -693,7 +693,7 @@ pum_set_selected(int n, int repeat)
+ 			/* May need to update the screen again when there are
+ 			 * autocommands involved. */
+ 			pum_do_redraw = TRUE;
+-			update_screen(0);
++			win_redr_status(curwin);
+ 			pum_do_redraw = FALSE;
+ 		    }
+ 		}
