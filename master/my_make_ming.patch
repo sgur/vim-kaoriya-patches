@@ -1,7 +1,31 @@
+diff --git a/src/GvimExt/Make_ming.mak b/src/GvimExt/Make_ming.mak
+index a6ab3ae..7cbbe43 100644
+--- a/src/GvimExt/Make_ming.mak
++++ b/src/GvimExt/Make_ming.mak
+@@ -47,7 +47,7 @@ endif
+ ifndef WINVER
+ WINVER = 0x0501
+ endif
+-CXX := $(CROSS_COMPILE)g++
++CXX := ccache $(CROSS_COMPILE)g++
+ WINDRES := $(CROSS_COMPILE)windres
+ WINDRES_CXX = $(CXX)
+ WINDRES_FLAGS = --preprocessor="$(WINDRES_CXX) -E -xc" -DRC_INVOKED
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index 62585e9..1907d14 100644
+index 62585e9..fc9d5c0 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
+@@ -402,8 +402,8 @@ MKDIR = mkdir
+ DIRSLASH = \\
+ endif
+ endif
+-CC := $(CROSS_COMPILE)gcc
+-CXX := $(CROSS_COMPILE)g++
++CC := ccache $(CROSS_COMPILE)gcc
++CXX := ccache $(CROSS_COMPILE)g++
+ ifeq ($(UNDER_CYGWIN),yes)
+ WINDRES := $(CROSS_COMPILE)windres
+ else
 @@ -414,7 +414,7 @@ WINDRES_CC = $(CC)
  #>>>>> end of choices
  ###########################################################################

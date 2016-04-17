@@ -3,19 +3,19 @@
 # Parent  2e92269ec226fe8c45d73226fe3ebc7b0aba816f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
-index 642f0ad..b25f4f6 100644
+index 2d7beb7..39f002d 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1786,6 +1786,8 @@ USAGE				RESULT	DESCRIPTION	~
- abs( {expr})			Float or Number  absolute value of {expr}
- acos( {expr})			Float	arc cosine of {expr}
- add( {list}, {item})		List	append {item} to |List| {list}
-+alcget( )			Dict	get copy |Dict| of autoload cache
-+alcreset( )			none	reset autoload cache
- alloc_fail( {id}, {countdown}, {repeat})
+@@ -1794,6 +1794,8 @@ USAGE				RESULT	DESCRIPTION	~
+ abs({expr})			Float or Number  absolute value of {expr}
+ acos({expr})			Float	arc cosine of {expr}
+ add({list}, {item})		List	append {item} to |List| {list}
++alcget()			Dict	get copy |Dict| of autoload cache
++alcreset()			none	reset autoload cache
+ alloc_fail({id}, {countdown}, {repeat})
  				none	make memory allocation fail
- and( {expr}, {expr})		Number  bitwise AND
-@@ -2219,6 +2221,16 @@ alloc_fail({id}, {countdown}, {repeat})			*alloc_fail()*
+ and({expr}, {expr})		Number  bitwise AND
+@@ -2241,6 +2243,16 @@ alloc_fail({id}, {countdown}, {repeat})			*alloc_fail()*
  		smaller than one it fails one time.
  
  
@@ -32,8 +32,19 @@ index 642f0ad..b25f4f6 100644
  and({expr}, {expr})					*and()*
  		Bitwise AND on the two arguments.  The arguments are converted
  		to a number.  A List, Dict or Float argument causes an error.
+@@ -2604,8 +2616,8 @@ char2nr({expr}[, {utf8}])					*char2nr()*
+ 			char2nr("ABC")		returns 65
+ <		When {utf8} is omitted or zero, the current 'encoding' is used.
+ 		Example for "utf-8": >
+-			char2nr("á")		returns 225
+-			char2nr("á"[0])		returns 195
++			char2nr("?")		returns 225
++			char2nr("?"[0])		returns 195
+ <		With {utf8} set to 1, always treat as utf-8 characters.
+ 		A combining character is a separate character.
+ 		|nr2char()| does the opposite.
 diff --git a/src/eval.c b/src/eval.c
-index 54cf215..dabffd0 100644
+index 59436a4..80c40f7 100644
 --- a/src/eval.c
 +++ b/src/eval.c
 @@ -122,6 +122,12 @@ static dictitem_T	globvars_var;		/* variable used for g: */
@@ -49,7 +60,7 @@ index 54cf215..dabffd0 100644
  /*
   * When recursively copying lists and dicts we need to remember which ones we
   * have done to avoid endless recursiveness.  This unique ID is used for that.
-@@ -463,6 +469,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
+@@ -469,6 +475,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
  static void f_acos(typval_T *argvars, typval_T *rettv);
  #endif
  static void f_add(typval_T *argvars, typval_T *rettv);
@@ -58,7 +69,7 @@ index 54cf215..dabffd0 100644
  static void f_alloc_fail(typval_T *argvars, typval_T *rettv);
  static void f_and(typval_T *argvars, typval_T *rettv);
  static void f_append(typval_T *argvars, typval_T *rettv);
-@@ -926,6 +934,7 @@ eval_init(void)
+@@ -939,6 +947,7 @@ eval_init(void)
      init_var_dict(&vimvardict, &vimvars_var, VAR_SCOPE);
      vimvardict.dv_lock = VAR_FIXED;
      hash_init(&compat_hashtab);
@@ -66,7 +77,7 @@ index 54cf215..dabffd0 100644
      hash_init(&func_hashtab);
  
      for (i = 0; i < VV_LEN; ++i)
-@@ -993,6 +1002,8 @@ eval_clear(void)
+@@ -1011,6 +1020,8 @@ eval_clear(void)
      hash_init(&vimvarht);  /* garbage_collect() will access it */
      hash_clear(&compat_hashtab);
  
@@ -75,7 +86,7 @@ index 54cf215..dabffd0 100644
      free_scriptnames();
  # if defined(FEAT_CMDL_COMPL)
      free_locales();
-@@ -8139,6 +8150,8 @@ static struct fst
+@@ -8323,6 +8334,8 @@ static struct fst
      {"acos",		1, 1, f_acos},	/* WJMc */
  #endif
      {"add",		2, 2, f_add},
@@ -84,7 +95,7 @@ index 54cf215..dabffd0 100644
      {"alloc_fail",	3, 3, f_alloc_fail},
      {"and",		2, 2, f_and},
      {"append",		2, 2, f_append},
-@@ -24490,6 +24503,215 @@ prof_self_cmp(const void *s1, const void *s2)
+@@ -24939,6 +24952,215 @@ prof_self_cmp(const void *s1, const void *s2)
  #endif
  
  /*
@@ -300,7 +311,7 @@ index 54cf215..dabffd0 100644
   * If "name" has a package name try autoloading the script for it.
   * Return TRUE if a package was loaded.
   */
-@@ -24502,6 +24724,7 @@ script_autoload(
+@@ -24951,6 +25173,7 @@ script_autoload(
      char_u	*scriptname, *tofree;
      int		ret = FALSE;
      int		i;
@@ -308,7 +319,7 @@ index 54cf215..dabffd0 100644
  
      /* If there is no '#' after name[0] there is no package name. */
      p = vim_strchr(name, AUTOLOAD_CHAR);
-@@ -24527,7 +24750,8 @@ script_autoload(
+@@ -24976,7 +25199,8 @@ script_autoload(
  	}
  
  	/* Try loading the package from $VIMRUNTIME/autoload/<name>.vim */
@@ -319,10 +330,10 @@ index 54cf215..dabffd0 100644
      }
  
 diff --git a/src/option.c b/src/option.c
-index 229a49e..3d27a7e 100644
+index 265f0cf..2c8242e 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -7194,6 +7194,14 @@ did_set_string_option(
+@@ -7186,6 +7186,14 @@ did_set_string_option(
      }
  #endif
  
@@ -338,7 +349,7 @@ index 229a49e..3d27a7e 100644
      else
      {
 diff --git a/src/proto/eval.pro b/src/proto/eval.pro
-index 1de7a6d..9cbae65 100644
+index 60fad80..4e486a3 100644
 --- a/src/proto/eval.pro
 +++ b/src/proto/eval.pro
 @@ -129,6 +129,7 @@ int translated_function_exists(char_u *name);
