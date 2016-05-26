@@ -1,5 +1,5 @@
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index fe2f9ac..2bdf854 100644
+index a836e53..baf76a3 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
 @@ -693,6 +693,7 @@ A jump table for the options with a short description can be found at |Q_op|.
@@ -7,12 +7,12 @@ index fe2f9ac..2bdf854 100644
  			expected by most users.
  	"double":	Use twice the width of ASCII characters.
 +	"fulldouble":	Use twice the width for neutral characters.
- 	"auto":		Use obtained width from system.
- 			{only for Win NT/2K systems, currently}
- 
-@@ -723,6 +724,13 @@ A jump table for the options with a short description can be found at |Q_op|.
- 	font design.  If you use such a system try "auto" for this option.
- 	It will give you more nice result for a font which you select.
+ 							*E834* *E835*
+ 	The value "double" cannot be used if 'listchars' or 'fillchars'
+ 	contains a character that would be double width.
+@@ -716,6 +717,13 @@ A jump table for the options with a short description can be found at |Q_op|.
+ 	compiled with the |+termresponse| feature and if |t_u7| is set to the
+ 	escape sequence to request cursor position report.
  
 +	Unicode consortium give data file about this East Asian Width
 +	(http://www.unicode.org/Public/UCD/latest/ucd/EastAsianWidth.txt).
@@ -25,7 +25,7 @@ index fe2f9ac..2bdf854 100644
  'antialias' 'anti'	boolean (default: off)
  			global
 diff --git a/runtime/tools/unicode.vim b/runtime/tools/unicode.vim
-index d733fe8..3f6bf3e 100644
+index 88c4c79..b9fa477 100644
 --- a/runtime/tools/unicode.vim
 +++ b/runtime/tools/unicode.vim
 @@ -195,7 +195,7 @@ func! BuildWidthTable(pattern, tableName)
@@ -35,9 +35,9 @@ index d733fe8..3f6bf3e 100644
 -    if p[1][0] =~ a:pattern
 +    if p[1][0] =~ a:pattern && !(a:pattern == 'N' && p[1] =~ '#.*LATIN')
        if p[0] =~ '\.\.'
- 	" It is a range.  we don't check for composing char then.
- 	let rng = split(p[0], '\.\.')
-@@ -256,7 +256,11 @@ endfunc
+         " It is a range.  we don't check for composing char then.
+         let rng = split(p[0], '\.\.')
+@@ -344,7 +344,11 @@ endfunc
  set equalalways
  
  " Edit the Unicode text file.  Requires the netrw plugin.
@@ -50,7 +50,7 @@ index d733fe8..3f6bf3e 100644
  
  " Parse each line, create a list of lists.
  call ParseDataToProps()
-@@ -271,7 +275,11 @@ call BuildCaseTable("Upper", 12)
+@@ -359,7 +363,11 @@ call BuildCaseTable("Upper", 12)
  call BuildCombiningTable()
  
  " Edit the case folding text file.  Requires the netrw plugin.
@@ -63,7 +63,7 @@ index d733fe8..3f6bf3e 100644
  
  " Parse each line, create a list of lists.
  call ParseFoldProps()
-@@ -280,7 +288,11 @@ call ParseFoldProps()
+@@ -368,7 +376,11 @@ call ParseFoldProps()
  call BuildFoldTable()
  
  " Edit the width text file.  Requires the netrw plugin.
@@ -76,20 +76,23 @@ index d733fe8..3f6bf3e 100644
  
  " Parse each line, create a list of lists.
  call ParseWidthProps()
-@@ -290,3 +302,6 @@ call BuildWidthTable('[WF]', 'doublewidth')
- 
- " Build the ambiguous width table.
+@@ -381,6 +393,9 @@ call BuildWidthTable('[WF]', 'doublewidth')
+ let s:ambitable = []
  call BuildWidthTable('A', 'ambiguous')
-+
+ 
 +" Build the neutral width table.
 +call BuildWidthTable('N', 'neutral')
++
+ " Edit the emoji text file.  Requires the netrw plugin.
+ edit http://www.unicode.org/Public/emoji/3.0/emoji-data.txt
+ 
 diff --git a/src/mbyte.c b/src/mbyte.c
-index ffdb8d9..ffe41dd 100644
+index e84fd40..b884d85 100644
 --- a/src/mbyte.c
 +++ b/src/mbyte.c
-@@ -1436,6 +1436,758 @@ utf_char2cells(int c)
- 	{0xf0000, 0xffffd},
- 	{0x100000, 0x10fffd}
+@@ -1439,6 +1439,758 @@ utf_char2cells(int c)
+ 	{0x20000, 0x2fffd},
+ 	{0x30000, 0x3fffd}
      };
 +    /* Sorted list of non-overlapping intervals of neutral part of East Asian
 +     * Ambiguous characters, generated with ../runtime/tools/unicode.vim. */
@@ -844,9 +847,9 @@ index ffdb8d9..ffe41dd 100644
 +	{0xe0020, 0xe007f}
 +    };
  
- #ifdef USE_AMBIWIDTH_AUTO
-     if (gui.in_use && *p_ambw == 'a')
-@@ -1475,7 +2227,11 @@ utf_char2cells(int c)
+     /* Sorted list of non-overlapping intervals of Emoji characters that don't
+      * have ambiguous or double width,
+@@ -1493,7 +2245,11 @@ utf_char2cells(int c)
      else if (c >= 0x80 && !vim_isprintc(c))
  	return 4;		/* unprintable, displays <xx> */
  
@@ -860,15 +863,15 @@ index ffdb8d9..ffe41dd 100644
  
      return 1;
 diff --git a/src/option.c b/src/option.c
-index 3f86a6f..c205e50 100644
+index 9009356..c8bee1d 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -3052,7 +3052,7 @@ static struct vimoption
+@@ -3046,7 +3046,7 @@ static struct vimoption options[] =
  #define PARAM_COUNT (sizeof(options) / sizeof(struct vimoption))
  
  #ifdef FEAT_MBYTE
--static char *(p_ambw_values[]) = {"single", "double",
-+static char *(p_ambw_values[]) = {"single", "double", "fulldouble",
- # ifdef USE_AMBIWIDTH_AUTO
-     "auto",
- # endif
+-static char *(p_ambw_values[]) = {"single", "double", NULL};
++static char *(p_ambw_values[]) = {"single", "double", "fulldouble", NULL};
+ #endif
+ static char *(p_bg_values[]) = {"light", "dark", NULL};
+ static char *(p_nf_values[]) = {"bin", "octal", "hex", "alpha", NULL};

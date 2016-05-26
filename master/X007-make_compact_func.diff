@@ -2,19 +2,20 @@
 # Parent 3e84e9c2c249355bdf1e51643255eda5a9e519b0
 Make compact stored functions (skeleton)
 
-diff -r 3e84e9c2c249 src/eval.c
---- a/src/eval.c	Wed Apr 17 22:42:59 2013 +0900
-+++ b/src/eval.c	Wed Apr 17 22:44:42 2013 +0900
-@@ -495,6 +495,8 @@
- static void f_cindent __ARGS((typval_T *argvars, typval_T *rettv));
- static void f_clearmatches __ARGS((typval_T *argvars, typval_T *rettv));
- static void f_col __ARGS((typval_T *argvars, typval_T *rettv));
-+static void f_compactinfo __ARGS((typval_T *argvars, typval_T *rettv));
-+static void f_compactreset __ARGS((typval_T *argvars, typval_T *rettv));
+diff --git a/src/eval.c b/src/eval.c
+index f03c786..bc8bd65 100644
+--- a/src/eval.c
++++ b/src/eval.c
+@@ -529,6 +529,8 @@ static void f_char2nr(typval_T *argvars, typval_T *rettv);
+ static void f_cindent(typval_T *argvars, typval_T *rettv);
+ static void f_clearmatches(typval_T *argvars, typval_T *rettv);
+ static void f_col(typval_T *argvars, typval_T *rettv);
++static void f_compactinfo(typval_T *argvars, typval_T *rettv);
++static void f_compactreset(typval_T *argvars, typval_T *rettv);
  #if defined(FEAT_INS_EXPAND)
- static void f_complete __ARGS((typval_T *argvars, typval_T *rettv));
- static void f_complete_add __ARGS((typval_T *argvars, typval_T *rettv));
-@@ -7882,6 +7884,8 @@
+ static void f_complete(typval_T *argvars, typval_T *rettv);
+ static void f_complete_add(typval_T *argvars, typval_T *rettv);
+@@ -8409,6 +8411,8 @@ static struct fst
      {"cindent",		1, 1, f_cindent},
      {"clearmatches",	0, 0, f_clearmatches},
      {"col",		1, 1, f_col},
@@ -23,7 +24,7 @@ diff -r 3e84e9c2c249 src/eval.c
  #if defined(FEAT_INS_EXPAND)
      {"complete",	2, 2, f_complete},
      {"complete_add",	1, 1, f_complete_add},
-@@ -9445,6 +9449,40 @@
+@@ -10627,6 +10631,40 @@ f_col(typval_T *argvars, typval_T *rettv)
      rettv->vval.v_number = col;
  }
  
@@ -64,7 +65,7 @@ diff -r 3e84e9c2c249 src/eval.c
  #if defined(FEAT_INS_EXPAND)
  /*
   * "complete()" function
-@@ -21174,6 +21212,26 @@
+@@ -23835,6 +23873,26 @@ find_option_end(char_u **arg, int *opt_flags)
      return p;
  }
  
@@ -91,7 +92,7 @@ diff -r 3e84e9c2c249 src/eval.c
  /*
   * ":function"
   */
-@@ -21207,6 +21265,8 @@
+@@ -23868,6 +23926,8 @@ ex_function(exarg_T *eap)
      int		todo;
      hashitem_T	*hi;
      int		sourcing_lnum_off;
@@ -100,7 +101,7 @@ diff -r 3e84e9c2c249 src/eval.c
  
      /*
       * ":function" without argument: list functions.
-@@ -21637,6 +21697,37 @@
+@@ -24304,6 +24364,37 @@ ex_function(exarg_T *eap)
  	    }
  	}
  
@@ -138,7 +139,7 @@ diff -r 3e84e9c2c249 src/eval.c
  	/* Add the line to the function. */
  	if (ga_grow(&newlines, 1 + sourcing_lnum_off) == FAIL)
  	{
-@@ -21657,6 +21748,7 @@
+@@ -24324,6 +24415,7 @@ ex_function(exarg_T *eap)
  	}
  
  	((char_u **)(newlines.ga_data))[newlines.ga_len++] = theline;
@@ -146,31 +147,33 @@ diff -r 3e84e9c2c249 src/eval.c
  
  	/* Add NULL lines for continuation lines, so that the line count is
  	 * equal to the index in the growarray.   */
-@@ -21804,6 +21896,7 @@
- 	STRCPY(fp->uf_name, name);
- 	hash_add(&func_hashtab, UF2HIKEY(fp));
+@@ -24475,6 +24567,7 @@ ex_function(exarg_T *eap)
+ 	    goto erret;
+ 	}
      }
 +    devel_compact_funcnum += 1;
      fp->uf_args = newargs;
      fp->uf_lines = newlines;
  #ifdef FEAT_PROFILE
-diff -r 3e84e9c2c249 src/globals.h
---- a/src/globals.h	Wed Apr 17 22:42:59 2013 +0900
-+++ b/src/globals.h	Wed Apr 17 22:44:42 2013 +0900
-@@ -233,6 +233,9 @@
- EXTERN int	debug_break_level INIT(= -1);	/* break below this level */
+diff --git a/src/globals.h b/src/globals.h
+index 5010cd4..c288945 100644
+--- a/src/globals.h
++++ b/src/globals.h
+@@ -232,6 +232,9 @@ EXTERN int	debug_break_level INIT(= -1);	/* break below this level */
  EXTERN int	debug_did_msg INIT(= FALSE);	/* did "debug mode" message */
  EXTERN int	debug_tick INIT(= 0);		/* breakpoint change count */
+ EXTERN int	debug_backtrace_level INIT(= 0); /* breakpoint backtrace level */
 +EXTERN int	devel_compact_presize INIT(= 0);
 +EXTERN int	devel_compact_postsize INIT(= 0);
 +EXTERN int	devel_compact_funcnum INIT(= 0);
  # ifdef FEAT_PROFILE
  EXTERN int	do_profiling INIT(= PROF_NONE);	/* PROF_ values */
  # endif
-diff -r 3e84e9c2c249 src/option.c
---- a/src/option.c	Wed Apr 17 22:42:59 2013 +0900
-+++ b/src/option.c	Wed Apr 17 22:44:42 2013 +0900
-@@ -812,6 +812,15 @@
+diff --git a/src/option.c b/src/option.c
+index fdea493..5fad03c 100644
+--- a/src/option.c
++++ b/src/option.c
+@@ -823,6 +823,15 @@ static struct vimoption options[] =
  			    SCRIPTID_INIT},
  			    /* P_PRI_MKRC isn't needed here, optval_default()
  			     * always returns TRUE for 'compatible' */
@@ -186,10 +189,11 @@ diff -r 3e84e9c2c249 src/option.c
      {"compatible",  "cp",   P_BOOL|P_RALL,
  			    (char_u *)&p_cp, PV_NONE,
  			    {(char_u *)TRUE, (char_u *)FALSE} SCRIPTID_INIT},
-diff -r 3e84e9c2c249 src/option.h
---- a/src/option.h	Wed Apr 17 22:42:59 2013 +0900
-+++ b/src/option.h	Wed Apr 17 22:44:42 2013 +0900
-@@ -391,6 +391,9 @@
+diff --git a/src/option.h b/src/option.h
+index 0340066..e19d39b 100644
+--- a/src/option.h
++++ b/src/option.h
+@@ -418,6 +418,9 @@ EXTERN long	p_ch;		/* 'cmdheight' */
  #if defined(FEAT_GUI_DIALOG) || defined(FEAT_CON_DIALOG)
  EXTERN int	p_confirm;	/* 'confirm' */
  #endif

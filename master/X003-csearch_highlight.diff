@@ -2,10 +2,25 @@
 # Parent 49cde2c6f62831f450a4b2a948e767b5cfc73e46
 # Parent  cb0284e6cd2022d20aca36cd21363052523df15c
 
-diff -r cb0284e6cd20 src/normal.c
---- a/src/normal.c	Sat Jul 04 12:11:03 2015 +0900
-+++ b/src/normal.c	Sat Jul 04 14:33:29 2015 +0900
-@@ -541,6 +541,112 @@
+diff --git a/src/normal.c b/src/normal.c
+index d9948ec..7656c3e 100644
+--- a/src/normal.c
++++ b/src/normal.c
+@@ -14,6 +14,13 @@
+ 
+ #include "vim.h"
+ 
++#if defined(DEBUG) && defined(WIN32)
++# define WIN32_LEAN_AND_MEAN
++# include <crtdbg.h>
++#else
++# define _RPT2(rptno,msg,arg1,arg2)
++#endif
++
+ /*
+  * The Visual area is remembered for reselection.
+  */
+@@ -533,6 +540,112 @@ find_command(int cmdchar)
      return idx;
  }
  
@@ -118,7 +133,7 @@ diff -r cb0284e6cd20 src/normal.c
  /*
   * Execute a command in Normal mode.
   */
-@@ -974,8 +1080,20 @@
+@@ -962,8 +1075,20 @@ getcount:
  		im_set_active(TRUE);
  #endif
  

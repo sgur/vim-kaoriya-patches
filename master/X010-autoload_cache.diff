@@ -3,20 +3,20 @@
 # Parent  2e92269ec226fe8c45d73226fe3ebc7b0aba816f
 
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
-index 2d7beb7..39f002d 100644
+index cb5fa43..ed4e2bd 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -1794,6 +1794,8 @@ USAGE				RESULT	DESCRIPTION	~
+@@ -1835,6 +1835,8 @@ USAGE				RESULT	DESCRIPTION	~
  abs({expr})			Float or Number  absolute value of {expr}
  acos({expr})			Float	arc cosine of {expr}
  add({list}, {item})		List	append {item} to |List| {list}
 +alcget()			Dict	get copy |Dict| of autoload cache
 +alcreset()			none	reset autoload cache
- alloc_fail({id}, {countdown}, {repeat})
- 				none	make memory allocation fail
  and({expr}, {expr})		Number  bitwise AND
-@@ -2241,6 +2243,16 @@ alloc_fail({id}, {countdown}, {repeat})			*alloc_fail()*
- 		smaller than one it fails one time.
+ append({lnum}, {string})	Number	append {string} below line {lnum}
+ append({lnum}, {list})		Number	append lines {list} below line {lnum}
+@@ -2284,6 +2286,16 @@ add({list}, {expr})					*add()*
+ 		Use |insert()| to add an item at another position.
  
  
 +alcget()						*alcget()*
@@ -32,7 +32,7 @@ index 2d7beb7..39f002d 100644
  and({expr}, {expr})					*and()*
  		Bitwise AND on the two arguments.  The arguments are converted
  		to a number.  A List, Dict or Float argument causes an error.
-@@ -2604,8 +2616,8 @@ char2nr({expr}[, {utf8}])					*char2nr()*
+@@ -2649,8 +2661,8 @@ char2nr({expr}[, {utf8}])					*char2nr()*
  			char2nr("ABC")		returns 65
  <		When {utf8} is omitted or zero, the current 'encoding' is used.
  		Example for "utf-8": >
@@ -44,10 +44,10 @@ index 2d7beb7..39f002d 100644
  		A combining character is a separate character.
  		|nr2char()| does the opposite.
 diff --git a/src/eval.c b/src/eval.c
-index 59436a4..80c40f7 100644
+index bc8bd65..890a6a5 100644
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -122,6 +122,12 @@ static dictitem_T	globvars_var;		/* variable used for g: */
+@@ -125,6 +125,12 @@ static dictitem_T	globvars_var;		/* variable used for g: */
   */
  static hashtab_T	compat_hashtab;
  
@@ -60,16 +60,16 @@ index 59436a4..80c40f7 100644
  /*
   * When recursively copying lists and dicts we need to remember which ones we
   * have done to avoid endless recursiveness.  This unique ID is used for that.
-@@ -469,6 +475,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
+@@ -472,6 +478,8 @@ static void f_abs(typval_T *argvars, typval_T *rettv);
  static void f_acos(typval_T *argvars, typval_T *rettv);
  #endif
  static void f_add(typval_T *argvars, typval_T *rettv);
 +static void f_alcget(typval_T *argvars, typval_T *rettv);
 +static void f_alcreset(typval_T *argvars, typval_T *rettv);
- static void f_alloc_fail(typval_T *argvars, typval_T *rettv);
  static void f_and(typval_T *argvars, typval_T *rettv);
  static void f_append(typval_T *argvars, typval_T *rettv);
-@@ -939,6 +947,7 @@ eval_init(void)
+ static void f_argc(typval_T *argvars, typval_T *rettv);
+@@ -953,6 +961,7 @@ eval_init(void)
      init_var_dict(&vimvardict, &vimvars_var, VAR_SCOPE);
      vimvardict.dv_lock = VAR_FIXED;
      hash_init(&compat_hashtab);
@@ -77,7 +77,7 @@ index 59436a4..80c40f7 100644
      hash_init(&func_hashtab);
  
      for (i = 0; i < VV_LEN; ++i)
-@@ -1011,6 +1020,8 @@ eval_clear(void)
+@@ -1025,6 +1034,8 @@ eval_clear(void)
      hash_init(&vimvarht);  /* garbage_collect() will access it */
      hash_clear(&compat_hashtab);
  
@@ -86,16 +86,24 @@ index 59436a4..80c40f7 100644
      free_scriptnames();
  # if defined(FEAT_CMDL_COMPL)
      free_locales();
-@@ -8323,6 +8334,8 @@ static struct fst
+@@ -8350,6 +8361,8 @@ static struct fst
      {"acos",		1, 1, f_acos},	/* WJMc */
  #endif
      {"add",		2, 2, f_add},
 +    {"alcget",		0, 0, f_alcget},
 +    {"alcreset",	0, 0, f_alcreset},
-     {"alloc_fail",	3, 3, f_alloc_fail},
      {"and",		2, 2, f_and},
      {"append",		2, 2, f_append},
-@@ -24939,6 +24952,215 @@ prof_self_cmp(const void *s1, const void *s2)
+     {"argc",		0, 0, f_argc},
+@@ -23926,7 +23939,6 @@ ex_function(exarg_T *eap)
+     int		todo;
+     hashitem_T	*hi;
+     int		sourcing_lnum_off;
+-    int		compacted_size = 0;
+     char_u	*compacted_prevline = NULL;
+ 
+     /*
+@@ -25175,6 +25187,213 @@ prof_self_cmp(const void *s1, const void *s2)
  #endif
  
  /*
@@ -202,7 +210,7 @@ index 59436a4..80c40f7 100644
 +{
 +    if (autoload_cache_built == TRUE)
 +	return;
-+    do_in_runtimepath("autoload/**/*.vim", TRUE, autoload_cache_add_callback,
++    do_in_runtimepath((char_u *)"autoload/**/*.vim", TRUE, autoload_cache_add_callback,
 +	    NULL);
 +    autoload_cache_built = TRUE;
 +}
@@ -218,10 +226,8 @@ index 59436a4..80c40f7 100644
 +{
 +    char_u	*r = NULL;
 +    hashitem_T	*hi;
-+    size_t	len;
 +
 +    autoload_cache_build();
-+    len = STRLEN(scriptname);
 +    hi = hash_find(&autoload_cache, scriptname);
 +    if (HASHITEM_EMPTY(hi))
 +    {
@@ -288,7 +294,7 @@ index 59436a4..80c40f7 100644
 +	pkgname = autoload_to_pkgname(hi->hi_key);
 +	if (pkgname)
 +	{
-+	    dict_add_nr_str(dict, pkgname, 0,
++	    dict_add_nr_str(dict, (char *)pkgname, 0,
 +		    hi->hi_key + STRLEN(hi->hi_key) + 1);
 +	    vim_free(pkgname);
 +	}
@@ -311,7 +317,7 @@ index 59436a4..80c40f7 100644
   * If "name" has a package name try autoloading the script for it.
   * Return TRUE if a package was loaded.
   */
-@@ -24951,6 +25173,7 @@ script_autoload(
+@@ -25187,6 +25406,7 @@ script_autoload(
      char_u	*scriptname, *tofree;
      int		ret = FALSE;
      int		i;
@@ -319,7 +325,7 @@ index 59436a4..80c40f7 100644
  
      /* If there is no '#' after name[0] there is no package name. */
      p = vim_strchr(name, AUTOLOAD_CHAR);
-@@ -24976,7 +25199,8 @@ script_autoload(
+@@ -25212,7 +25432,8 @@ script_autoload(
  	}
  
  	/* Try loading the package from $VIMRUNTIME/autoload/<name>.vim */
@@ -330,10 +336,10 @@ index 59436a4..80c40f7 100644
      }
  
 diff --git a/src/option.c b/src/option.c
-index 265f0cf..2c8242e 100644
+index 5fad03c..9009356 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -7186,6 +7186,14 @@ did_set_string_option(
+@@ -7204,6 +7204,14 @@ did_set_string_option(
      }
  #endif
  

@@ -3,10 +3,10 @@
 Add guess encode feature
 
 diff --git a/src/eval.c b/src/eval.c
-index 5d1e5e6..b38ee0b 100644
+index 3578c99..f03c786 100644
 --- a/src/eval.c
 +++ b/src/eval.c
-@@ -12944,6 +12944,7 @@ f_has(argvars, rettv)
+@@ -13855,6 +13855,7 @@ f_has(typval_T *argvars, typval_T *rettv)
  #ifdef FEAT_GETTEXT
  	"gettext",
  #endif
@@ -15,10 +15,10 @@ index 5d1e5e6..b38ee0b 100644
  	"gui",
  #endif
 diff --git a/src/fileio.c b/src/fileio.c
-index 75a3876..593bc44 100644
+index 5626712..a34d77d 100644
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -179,6 +179,244 @@ filemess(buf, name, s, attr)
+@@ -191,6 +191,244 @@ filemess(
      msg_scrolled_ign = FALSE;
  }
  
@@ -166,7 +166,7 @@ index 75a3876..593bc44 100644
 +    /* open a file. */
 +    if (!fname)
 +	return 0; /* not support to read from stdin. */
-+    fp = mch_fopen(fname, "r");
++    fp = mch_fopen((char *)fname, "r");
 +    if (!fp)
 +	return 0; /* raise an error when failed to open file. */
 +
@@ -226,7 +226,7 @@ index 75a3876..593bc44 100644
 +	    if (p_verbose >= 1)
 +	    {
 +		verbose_enter_scroll();
-+		smsg("    check: name=%s enable=%d score=%d",
++		smsg((char_u *)"    check: name=%s enable=%d score=%d",
 +			pstate->name, pstate->enable, pstate->score);
 +		verbose_leave_scroll();
 +	    }
@@ -249,7 +249,7 @@ index 75a3876..593bc44 100644
 +	if (p_verbose >= 1)
 +	{
 +	    verbose_enter_scroll();
-+	    smsg("    result: newenc=%s", newenc);
++	    smsg((char_u *)"    result: newenc=%s", newenc);
 +	    verbose_leave_scroll();
 +	}
 +	if (*fenc_alloced)
@@ -263,7 +263,7 @@ index 75a3876..593bc44 100644
  /*
   * Read lines from file "fname" into the buffer after line "from".
   *
-@@ -1025,6 +1263,17 @@ retry:
+@@ -1041,6 +1279,17 @@ retry:
  	}
      }
  
@@ -274,7 +274,7 @@ index 75a3876..593bc44 100644
 +    if (STRICMP(fenc, "guess") == 0)
 +    {
 +        if (guess_encode(&fenc, &fenc_alloced, fname) != 0)
-+            set_internal_string_var("b:x_guessed_fileencoding", fenc);
++            set_internal_string_var((char_u *)"b:x_guessed_fileencoding", fenc);
 +    }
 +# endif
 +
@@ -282,10 +282,10 @@ index 75a3876..593bc44 100644
       * Conversion may be required when the encoding of the file is different
       * from 'encoding' or 'encoding' is UTF-16, UCS-2 or UCS-4.
 diff --git a/src/version.c b/src/version.c
-index 6a944b4..c313cba 100644
+index 8725ce8..01d5f80 100644
 --- a/src/version.c
 +++ b/src/version.c
-@@ -269,6 +269,7 @@ static char *(features[]) =
+@@ -270,6 +270,7 @@ static char *(features[]) =
  #else
  	"-gettext",
  #endif
