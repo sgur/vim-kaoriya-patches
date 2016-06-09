@@ -1,8 +1,8 @@
 diff --git a/src/Make_cyg_ming.mak b/src/Make_cyg_ming.mak
-index 62585e9..1907d14 100644
+index cdf10ac..cedadb4 100644
 --- a/src/Make_cyg_ming.mak
 +++ b/src/Make_cyg_ming.mak
-@@ -414,7 +414,7 @@ WINDRES_CC = $(CC)
+@@ -418,7 +418,7 @@ WINDRES_CC = $(CC)
  #>>>>> end of choices
  ###########################################################################
  
@@ -11,7 +11,7 @@ index 62585e9..1907d14 100644
  CXXFLAGS = -std=gnu++11
  WINDRES_FLAGS = --preprocessor="$(WINDRES_CC) -E -xc" -DRC_INVOKED
  EXTRA_LIBS =
-@@ -579,6 +579,7 @@ else
+@@ -583,6 +583,7 @@ else
  ifeq ($(OPTIMIZE), MAXSPEED)
  CFLAGS += -O3
  CFLAGS += -fomit-frame-pointer -freg-struct-return
@@ -19,7 +19,7 @@ index 62585e9..1907d14 100644
  else  # SPEED
  CFLAGS += -O2
  endif
-@@ -785,7 +786,8 @@ endif
+@@ -789,7 +790,8 @@ endif
  
  ifeq (yes, $(USE_STDCPLUS))
  ifeq (yes, $(STATIC_STDCPLUS))
@@ -29,42 +29,8 @@ index 62585e9..1907d14 100644
  else
  LIB += -lstdc++
  endif
-@@ -797,13 +799,13 @@ vimrun.exe: vimrun.c
- 	$(CC) $(CFLAGS) -o vimrun.exe vimrun.c $(LIB)
- 
- install.exe: dosinst.c
--	$(CC) $(CFLAGS) -o install.exe dosinst.c $(LIB) -lole32 -luuid
-+	$(CC) $(CFLAGS) -o install.exe dosinst.c -lole32 -luuid $(LIB)
- 
- uninstal.exe: uninstal.c
- 	$(CC) $(CFLAGS) -o uninstal.exe uninstal.c $(LIB)
- 
- $(TARGET): $(OUTDIR) $(OBJ)
--	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
-+	$(CC) $(CFLAGS) $(LFLAGS) -o $@ $(OBJ) -lole32 -luuid $(LIB) $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)
- 
- upx: exes
- 	upx gvim.exe
-@@ -906,7 +908,7 @@ ifneq (sh.exe, $(SHELL))
- 	@echo 'char_u *default_vim_dir = (char_u *)"$(VIMRCLOC)";' >> pathdef.c
- 	@echo 'char_u *default_vimruntime_dir = (char_u *)"$(VIMRUNTIMEDIR)";' >> pathdef.c
- 	@echo 'char_u *all_cflags = (char_u *)"$(CC) $(CFLAGS)";' >> pathdef.c
--	@echo 'char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)";' >> pathdef.c
-+	@echo 'char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) -lole32 -luuid $(LIB) $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)";' >> pathdef.c
- 	@echo 'char_u *compiled_user = (char_u *)"$(USERNAME)";' >> pathdef.c
- 	@echo 'char_u *compiled_sys = (char_u *)"$(USERDOMAIN)";' >> pathdef.c
- else
-@@ -916,7 +918,7 @@ else
- 	@echo char_u *default_vim_dir = (char_u *)"$(VIMRCLOC)"; >> pathdef.c
- 	@echo char_u *default_vimruntime_dir = (char_u *)"$(VIMRUNTIMEDIR)"; >> pathdef.c
- 	@echo char_u *all_cflags = (char_u *)"$(CC) $(CFLAGS)"; >> pathdef.c
--	@echo char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) $(LIB) -lole32 -luuid $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)"; >> pathdef.c
-+	@echo char_u *all_lflags = (char_u *)"$(CC) $(CFLAGS) $(LFLAGS) -o $(TARGET) -lole32 -luuid $(LIB) $(LUA_LIB) $(MZSCHEME_LIBDIR) $(MZSCHEME_LIB) $(PYTHONLIB) $(PYTHON3LIB) $(RUBYLIB)"; >> pathdef.c
- 	@echo char_u *compiled_user = (char_u *)"$(USERNAME)"; >> pathdef.c
- 	@echo char_u *compiled_sys = (char_u *)"$(USERDOMAIN)"; >> pathdef.c
- endif
 diff --git a/src/Make_ming.mak b/src/Make_ming.mak
-index 9ed1a70..659be93 100644
+index 9ed1a70..9aef4e6 100644
 --- a/src/Make_ming.mak
 +++ b/src/Make_ming.mak
 @@ -11,6 +11,8 @@
@@ -81,7 +47,7 @@ index 9ed1a70..659be93 100644
  # on my NT box, it's here:
  #PYTHON=c:/python20
 +PYTHON_VER=27
-+PYTHON=c:/git-sdk-64/mingw64
++PYTHON3=$(shell cygpath -m /mingw64)
 +PYTHON_HOME=$(PYTHON)
 +PYTHONINC=-I$(PYTHON)/include/python2.7
 +DYNAMIC_PYTHON_DLL=libpython2.7.dll
@@ -89,7 +55,7 @@ index 9ed1a70..659be93 100644
  # uncomment 'PYTHON3' if you want a python3-enabled version
  #PYTHON3=c:/python31
 +PYTHON3_VER=35
-+PYTHON3=c:/git-sdk-64/mingw64
++PYTHON3=$(shell cygpath -m /mingw64)
 +PYTHON3_HOME=$(PYTHON3)
 +PYTHON3INC=-I$(PYTHON3)/include/python3.5m
 +DYNAMIC_PYTHON3_DLL=libpython3.5m.dll
