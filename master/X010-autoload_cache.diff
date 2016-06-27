@@ -32,17 +32,6 @@ index cb5fa43..ed4e2bd 100644
  and({expr}, {expr})					*and()*
  		Bitwise AND on the two arguments.  The arguments are converted
  		to a number.  A List, Dict or Float argument causes an error.
-@@ -2649,8 +2661,8 @@ char2nr({expr}[, {utf8}])					*char2nr()*
- 			char2nr("ABC")		returns 65
- <		When {utf8} is omitted or zero, the current 'encoding' is used.
- 		Example for "utf-8": >
--			char2nr("á")		returns 225
--			char2nr("á"[0])		returns 195
-+			char2nr("?")		returns 225
-+			char2nr("?"[0])		returns 195
- <		With {utf8} set to 1, always treat as utf-8 characters.
- 		A combining character is a separate character.
- 		|nr2char()| does the opposite.
 diff --git a/src/eval.c b/src/eval.c
 index bc8bd65..890a6a5 100644
 --- a/src/eval.c
@@ -95,14 +84,6 @@ index bc8bd65..890a6a5 100644
      {"and",		2, 2, f_and},
      {"append",		2, 2, f_append},
      {"argc",		0, 0, f_argc},
-@@ -23926,7 +23939,6 @@ ex_function(exarg_T *eap)
-     int		todo;
-     hashitem_T	*hi;
-     int		sourcing_lnum_off;
--    int		compacted_size = 0;
-     char_u	*compacted_prevline = NULL;
- 
-     /*
 @@ -25175,6 +25187,213 @@ prof_self_cmp(const void *s1, const void *s2)
  #endif
  
