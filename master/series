@@ -35,3 +35,4 @@ my_make_ming.patch
 suppress_redraw_completeopt_redraw.patch
 ambiwidth_fulldouble.diff
 issue869_fixflicker.patch
+h-east_clpum.diff
