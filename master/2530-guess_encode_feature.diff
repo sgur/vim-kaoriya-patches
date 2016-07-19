@@ -1,12 +1,12 @@
-# HG changeset patch
+﻿# HG changeset patch
 # Parent 1d03b0abe77114c204201b3dfebe8e7af48270d7
 Add guess encode feature
 
-diff --git a/src/eval.c b/src/eval.c
-index 3578c99..f03c786 100644
---- a/src/eval.c
-+++ b/src/eval.c
-@@ -13855,6 +13855,7 @@ f_has(typval_T *argvars, typval_T *rettv)
+diff --git a/src/evalfunc.c b/src/evalfunc.c
+index a8a13d8..e6f9312 100644
+--- a/src/evalfunc.c
++++ b/src/evalfunc.c
+@@ -5145,6 +5145,7 @@ f_has(typval_T *argvars, typval_T *rettv)
  #ifdef FEAT_GETTEXT
  	"gettext",
  #endif
@@ -15,7 +15,7 @@ index 3578c99..f03c786 100644
  	"gui",
  #endif
 diff --git a/src/fileio.c b/src/fileio.c
-index 5626712..a34d77d 100644
+index e9dca0c..05702be 100644
 --- a/src/fileio.c
 +++ b/src/fileio.c
 @@ -191,6 +191,244 @@ filemess(
@@ -282,7 +282,7 @@ index 5626712..a34d77d 100644
       * Conversion may be required when the encoding of the file is different
       * from 'encoding' or 'encoding' is UTF-16, UCS-2 or UCS-4.
 diff --git a/src/version.c b/src/version.c
-index 8725ce8..01d5f80 100644
+index 7001152..9db9635 100644
 --- a/src/version.c
 +++ b/src/version.c
 @@ -270,6 +270,7 @@ static char *(features[]) =
