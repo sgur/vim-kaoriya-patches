@@ -1,10 +1,11 @@
 # HG changeset patch
 # Parent c9781966b110ece39b8c3d58d0635bf98f2d20d1
 
-diff -r c9781966b110 src/popupmnu.c
---- a/src/popupmnu.c	Wed Jul 16 15:44:43 2014 +0900
-+++ b/src/popupmnu.c	Thu Jul 17 11:48:39 2014 +0900
-@@ -574,6 +574,10 @@
+diff --git a/src/popupmnu.c b/src/popupmnu.c
+index b479b00..933d879 100644
+--- a/src/popupmnu.c
++++ b/src/popupmnu.c
+@@ -582,6 +582,10 @@ pum_set_selected(int n, int repeat)
  
  	    if (curwin->w_p_pvw)
  	    {
@@ -12,6 +13,6 @@ diff -r c9781966b110 src/popupmnu.c
 +		 * redrawing */
 +		if (!resized)
 +		    curwin->w_redr_status = FALSE;
- 		if (curbuf->b_fname == NULL
- 			&& curbuf->b_p_bt[0] == 'n' && curbuf->b_p_bt[2] == 'f'
- 			&& curbuf->b_p_bh[0] == 'w')
+ 		if (!resized
+ 			&& curbuf->b_nwindows == 1
+ 			&& curbuf->b_fname == NULL
