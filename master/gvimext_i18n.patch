@@ -7,7 +7,7 @@ index b682b74..c9ce8eb 100644
  	if (dyn_libintl_init(szBuff))
  	{
 -	    strcpy(szBuff + len, "lang");
-+	    strcpy(szBuff + len, "vim74/lang");
++	    strcpy(szBuff + len, "vim80/lang");
  
  	    (*dyn_libintl_bindtextdomain)(VIMPACKAGE, szBuff);
  	    (*dyn_libintl_textdomain)(VIMPACKAGE);
