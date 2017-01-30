@@ -1,8 +1,8 @@
-fix-rubydyn.diff
-disable_regexp_logs.diff #-no_kaoriya
+fix-rubydyn.diff #+unnecessary
+disable_regexp_logs.diff #+no_kaoriya
 python2-warn.diff #-no_kaoriya
 0001-rich_icon.diff #-no_kaoriya
-0100-embed_manifest.diff #-no_kaoriya
+0100-embed_manifest.diff #+no_kaoriya
 2001-improve_modelines.diff #+no_kaoriya
 2002-windows_transparency.diff #-no_kaoriya
 2003-charspace.diff #+no_kaoriya
@@ -28,10 +28,11 @@ X013-721-investigate.diff #+debug
 X014-ex-reverse.diff #+experiments
 0000-kaoriya_marks.diff #+no_kaoriya
 vim_icon.patch
-make_mvc_x64.patch
+make_mvc_x64.patch #+msvc
 gvimext_i18n.patch
-my_make_ming.patch
+my_make_ming.patch #+mingw64_msys2
 suppress_redraw_completeopt_redraw.patch
-ambiwidth_fulldouble.diff
+ambiwidth_fulldouble.diff #+experiments
 issue869_fixflicker.patch
 h-east_clpum.diff
+uninstal_need_ole32.diff

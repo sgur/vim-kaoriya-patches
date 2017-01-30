@@ -1,5 +1,5 @@
 diff --git a/Filelist b/Filelist
-index ea6f2e2..43b63c2 100644
+index a3c8f54..d6be158 100644
 --- a/Filelist
 +++ b/Filelist
 @@ -16,6 +16,7 @@ SRC_ALL =	\
@@ -10,7 +10,7 @@ index ea6f2e2..43b63c2 100644
  		src/crypt.c \
  		src/crypt_zip.c \
  		src/dict.c \
-@@ -131,6 +132,7 @@ SRC_ALL =	\
+@@ -133,6 +134,7 @@ SRC_ALL =	\
  		src/proto/buffer.pro \
  		src/proto/channel.pro \
  		src/proto/charset.pro \
@@ -19,10 +19,10 @@ index ea6f2e2..43b63c2 100644
  		src/proto/crypt_zip.pro \
  		src/proto/dict.pro \
 diff --git a/runtime/doc/eval.txt b/runtime/doc/eval.txt
-index f5ea078..22dd0f8 100644
+index 58a61f2..1ff7704 100644
 --- a/runtime/doc/eval.txt
 +++ b/runtime/doc/eval.txt
-@@ -8303,6 +8303,7 @@ byte_offset		Compiled with support for 'o' in 'statusline'
+@@ -8325,6 +8325,7 @@ byte_offset		Compiled with support for 'o' in 'statusline'
  cindent			Compiled with 'cindent' support.
  clientserver		Compiled with remote invocation support |clientserver|.
  clipboard		Compiled with 'clipboard' support.
@@ -31,7 +31,7 @@ index f5ea078..22dd0f8 100644
  cmdline_hist		Compiled with |cmdline-history| support.
  cmdline_info		Compiled with 'showcmd' and 'ruler' support.
 diff --git a/runtime/doc/options.txt b/runtime/doc/options.txt
-index 3d8e053..acd5318 100644
+index 385f0bb..8dbe6b8 100644
 --- a/runtime/doc/options.txt
 +++ b/runtime/doc/options.txt
 @@ -1620,6 +1620,44 @@ A jump table for the options with a short description can be found at |Q_op|.
@@ -79,7 +79,7 @@ index 3d8e053..acd5318 100644
  						*'cmdheight'* *'ch'*
  'cmdheight' 'ch'	number	(default 1)
  			global
-@@ -8497,12 +8535,21 @@ A jump table for the options with a short description can be found at |Q_op|.
+@@ -8526,12 +8564,21 @@ A jump table for the options with a short description can be found at |Q_op|.
  	"list:longest"	When more than one match, list all matches and
  			complete till longest common string.
  	When there is only a single match, it is fully completed in all cases.
@@ -338,7 +338,7 @@ index 00d4763..d4bfd62 100644
   ascii.h keymap.h term.h macros.h option.h structs.h regexp.h gui.h \
   gui_beval.h [.proto]gui_beval.pro alloc.h ex_cmds.h spell.h proto.h \
 diff --git a/src/Makefile b/src/Makefile
-index 7ae3fcb..38dd997 100644
+index 6844443..033cc87 100644
 --- a/src/Makefile
 +++ b/src/Makefile
 @@ -1505,6 +1505,7 @@ BASIC_SRC = \
@@ -349,15 +349,15 @@ index 7ae3fcb..38dd997 100644
  	crypt.c \
  	crypt_zip.c \
  	dict.c \
-@@ -1612,6 +1613,7 @@ OBJ_COMMON = \
+@@ -1613,6 +1614,7 @@ OBJ_COMMON = \
+ 	objects/arabic.o \
  	objects/buffer.o \
  	objects/blowfish.o \
- 	objects/charset.o \
 +	objects/clpum.o \
  	objects/crypt.o \
  	objects/crypt_zip.o \
  	objects/dict.o \
-@@ -1719,6 +1721,7 @@ PRO_AUTO = \
+@@ -1733,6 +1735,7 @@ PRO_AUTO = \
  	blowfish.pro \
  	buffer.pro \
  	charset.pro \
@@ -365,7 +365,7 @@ index 7ae3fcb..38dd997 100644
  	crypt.pro \
  	crypt_zip.pro \
  	dict.pro \
-@@ -2083,6 +2086,7 @@ test_arglist \
+@@ -2101,6 +2104,7 @@ test_arglist \
  	test_cdo \
  	test_channel \
  	test_charsearch \
@@ -373,7 +373,7 @@ index 7ae3fcb..38dd997 100644
  	test_cmdline \
  	test_command_count \
  	test_crypt \
-@@ -2895,6 +2899,9 @@ objects/buffer.o: buffer.c
+@@ -2929,6 +2933,9 @@ objects/buffer.o: buffer.c
  objects/charset.o: charset.c
  	$(CCC) -o $@ charset.c
  
@@ -383,7 +383,7 @@ index 7ae3fcb..38dd997 100644
  objects/crypt.o: crypt.c
  	$(CCC) -o $@ crypt.c
  
-@@ -3284,6 +3291,10 @@ objects/charset.o: charset.c vim.h auto/config.h feature.h os_unix.h auto/osdef.
+@@ -3322,6 +3329,10 @@ objects/charset.o: charset.c vim.h auto/config.h feature.h os_unix.h auto/osdef.
   ascii.h keymap.h term.h macros.h option.h structs.h regexp.h gui.h \
   gui_beval.h proto/gui_beval.pro alloc.h ex_cmds.h spell.h proto.h \
   globals.h farsi.h arabic.h
@@ -835,7 +835,7 @@ index 0000000..adebd6b
 +}
 +#endif
 diff --git a/src/eval.c b/src/eval.c
-index 11fc035..f127465 100644
+index a5ae4f8..3d94a26 100644
 --- a/src/eval.c
 +++ b/src/eval.c
 @@ -187,6 +187,7 @@ static struct vimvar
@@ -846,7 +846,7 @@ index 11fc035..f127465 100644
  };
  
  /* shorthand */
-@@ -293,6 +294,7 @@ eval_init(void)
+@@ -317,6 +318,7 @@ eval_init(void)
      set_vim_var_nr(VV_SEARCHFORWARD, 1L);
      set_vim_var_nr(VV_HLSEARCH, 1L);
      set_vim_var_dict(VV_COMPLETED_ITEM, dict_alloc());
@@ -855,7 +855,7 @@ index 11fc035..f127465 100644
  
      set_vim_var_nr(VV_FALSE, VVAL_FALSE);
 diff --git a/src/evalfunc.c b/src/evalfunc.c
-index f66fa9a..d178bec 100644
+index 6706fe1..dad8f38 100644
 --- a/src/evalfunc.c
 +++ b/src/evalfunc.c
 @@ -98,6 +98,9 @@ static void f_changenr(typval_T *argvars, typval_T *rettv);
@@ -868,7 +868,7 @@ index f66fa9a..d178bec 100644
  static void f_col(typval_T *argvars, typval_T *rettv);
  #if defined(FEAT_INS_EXPAND)
  static void f_complete(typval_T *argvars, typval_T *rettv);
-@@ -522,6 +525,9 @@ static struct fst
+@@ -525,6 +528,9 @@ static struct fst
      {"char2nr",		1, 2, f_char2nr},
      {"cindent",		1, 1, f_cindent},
      {"clearmatches",	0, 0, f_clearmatches},
@@ -878,7 +878,7 @@ index f66fa9a..d178bec 100644
      {"col",		1, 1, f_col},
  #if defined(FEAT_INS_EXPAND)
      {"complete",	2, 2, f_complete},
-@@ -2090,6 +2096,20 @@ f_clearmatches(typval_T *argvars UNUSED, typval_T *rettv UNUSED)
+@@ -2068,6 +2074,20 @@ f_clearmatches(typval_T *argvars UNUSED, typval_T *rettv UNUSED)
  #endif
  }
  
@@ -899,7 +899,7 @@ index f66fa9a..d178bec 100644
  /*
   * "col(string)" function
   */
-@@ -5538,6 +5558,9 @@ f_has(typval_T *argvars, typval_T *rettv)
+@@ -5507,6 +5527,9 @@ f_has(typval_T *argvars, typval_T *rettv)
  #ifdef FEAT_CLIPBOARD
  	"clipboard",
  #endif
@@ -910,7 +910,7 @@ index f66fa9a..d178bec 100644
  	"cmdline_compl",
  #endif
 diff --git a/src/ex_getln.c b/src/ex_getln.c
-index 162e555..95581dc 100644
+index 4365100..6c75cc3 100644
 --- a/src/ex_getln.c
 +++ b/src/ex_getln.c
 @@ -83,6 +83,118 @@ static int	cmd_hkmap = 0;	/* Hebrew mapping during command line */
@@ -1312,7 +1312,7 @@ index 162e555..95581dc 100644
  	/* CTRL-\ CTRL-N goes to Normal mode, CTRL-\ CTRL-G goes to Insert
  	 * mode when 'insertmode' is set, CTRL-\ e prompts for an expression. */
  	if (c == Ctrl_BSL)
-@@ -821,102 +1059,161 @@ getcmdline(
+@@ -819,102 +1057,161 @@ getcmdline(
  	 * - wildcard expansion is only done when the 'wildchar' key is really
  	 *   typed, not when it comes from a macro
  	 */
@@ -1542,7 +1542,7 @@ index 162e555..95581dc 100644
  	    }
  	    if (wim_index < 3)
  		++wim_index;
-@@ -929,7 +1226,11 @@ getcmdline(
+@@ -927,7 +1224,11 @@ getcmdline(
  	gotesc = FALSE;
  
  	/* <S-Tab> goes to last match, in a clumsy way */
@@ -1555,7 +1555,7 @@ index 162e555..95581dc 100644
  	{
  	    if (nextwild(&xpc, WILD_EXPAND_KEEP, 0, firstc != '@') == OK
  		    && nextwild(&xpc, WILD_PREV, 0, firstc != '@') == OK
-@@ -1059,6 +1360,7 @@ getcmdline(
+@@ -1057,6 +1358,7 @@ getcmdline(
  		    redraw_cmdline = TRUE;
  		    goto returncmd;		/* back to cmd mode */
  		}
@@ -1563,7 +1563,7 @@ index 162e555..95581dc 100644
  		goto cmdline_changed;
  
  	case K_INS:
-@@ -1234,11 +1536,26 @@ getcmdline(
+@@ -1232,11 +1534,26 @@ getcmdline(
  		goto cmdline_changed;
  
  	case Ctrl_D:
@@ -1594,7 +1594,7 @@ index 162e555..95581dc 100644
  
  	case K_RIGHT:
  	case K_S_RIGHT:
-@@ -1517,16 +1834,24 @@ getcmdline(
+@@ -1515,16 +1832,24 @@ getcmdline(
  
  	case Ctrl_N:	    /* next match */
  	case Ctrl_P:	    /* previous match */
@@ -1622,7 +1622,7 @@ index 162e555..95581dc 100644
  	case K_UP:
  	case K_DOWN:
  	case K_S_UP:
-@@ -1535,6 +1860,11 @@ getcmdline(
+@@ -1533,6 +1858,11 @@ getcmdline(
  	case K_KPAGEUP:
  	case K_PAGEDOWN:
  	case K_KPAGEDOWN:
@@ -1634,7 +1634,7 @@ index 162e555..95581dc 100644
  		if (hislen == 0 || firstc == NUL)	/* no history */
  		    goto cmdline_not_changed;
  
-@@ -1984,6 +2314,13 @@ getcmdline(
+@@ -1986,6 +2316,13 @@ getcmdline(
  	    if (vpeekc() == NUL)
  		redrawcmd();
  #endif
@@ -1648,7 +1648,7 @@ index 162e555..95581dc 100644
      }
  
  returncmd:
-@@ -1998,6 +2335,9 @@ getcmdline(
+@@ -2000,6 +2337,9 @@ getcmdline(
  
      ExpandCleanup(&xpc);
      ccline.xpc = NULL;
@@ -1658,7 +1658,7 @@ index 162e555..95581dc 100644
  
  #ifdef FEAT_SEARCH_EXTRA
      if (did_incsearch)
-@@ -2082,6 +2422,10 @@ getcmdline(
+@@ -2084,6 +2424,10 @@ getcmdline(
  #ifdef CURSOR_SHAPE
      ui_cursor_shape();		/* may show different cursor shape */
  #endif
@@ -1669,7 +1669,7 @@ index 162e555..95581dc 100644
  
      {
  	char_u *p = ccline.cmdbuff;
-@@ -2954,6 +3298,8 @@ put_on_cmdline(char_u *str, int len, int redraw)
+@@ -2961,6 +3305,8 @@ put_on_cmdline(char_u *str, int len, int redraw)
      int		m;
      int		c;
  
@@ -1678,7 +1678,7 @@ index 162e555..95581dc 100644
      if (len < 0)
  	len = (int)STRLEN(str);
  
-@@ -3129,6 +3475,9 @@ save_cmdline(struct cmdline_info *ccp)
+@@ -3136,6 +3482,9 @@ save_cmdline(struct cmdline_info *ccp)
      ccline.cmdbuff = NULL;
      ccline.cmdprompt = NULL;
      ccline.xpc = NULL;
@@ -1688,7 +1688,7 @@ index 162e555..95581dc 100644
  }
  
  /*
-@@ -3139,6 +3488,9 @@ restore_cmdline(struct cmdline_info *ccp)
+@@ -3146,6 +3495,9 @@ restore_cmdline(struct cmdline_info *ccp)
  {
      ccline = prev_ccline;
      prev_ccline = *ccp;
@@ -1698,7 +1698,7 @@ index 162e555..95581dc 100644
  }
  
  #if defined(FEAT_EVAL) || defined(PROTO)
-@@ -3327,6 +3679,10 @@ redrawcmdline(void)
+@@ -3334,6 +3686,10 @@ redrawcmdline(void)
      need_wait_return = FALSE;
      compute_cmdrow();
      redrawcmd();
@@ -1709,7 +1709,7 @@ index 162e555..95581dc 100644
      cursorcmd();
  }
  
-@@ -3480,6 +3836,25 @@ sort_func_compare(const void *s1, const void *s2)
+@@ -3487,6 +3843,25 @@ sort_func_compare(const void *s1, const void *s2)
  #endif
  
  /*
@@ -1735,7 +1735,7 @@ index 162e555..95581dc 100644
   * Return FAIL if this is not an appropriate context in which to do
   * completion of anything, return OK if it is (even if there are no matches).
   * For the caller, this means that the character is just passed through like a
-@@ -5815,6 +6190,8 @@ get_history_idx(int histype)
+@@ -5824,6 +6199,8 @@ get_history_idx(int histype)
      return history[histype][hisidx[histype]].hisnum;
  }
  
@@ -1744,7 +1744,7 @@ index 162e555..95581dc 100644
  /*
   * Calculate history index from a number:
   *   num > 0: seen as identifying number of a history entry
-@@ -6058,6 +6435,21 @@ get_cmdline_str(void)
+@@ -6067,6 +6444,21 @@ get_cmdline_str(void)
  }
  
  /*
@@ -1766,7 +1766,7 @@ index 162e555..95581dc 100644
   * Get the current command line position, counted in bytes.
   * Zero is the first position.
   * Only works when the command line is being edited.
-@@ -7128,3 +7520,2008 @@ set_search_match(pos_T *t)
+@@ -7135,3 +7527,2008 @@ set_search_match(pos_T *t)
      }
  }
  #endif
@@ -3794,10 +3794,10 @@ index 138279e..9e9f9de 100644
   *			of code.
   * VIMINFO_FILE		Location of user .viminfo file (should start with $).
 diff --git a/src/fileio.c b/src/fileio.c
-index bcb8fef..dd6cf71 100644
+index 9380953..6ad2067 100644
 --- a/src/fileio.c
 +++ b/src/fileio.c
-@@ -7655,6 +7655,7 @@ static struct event_name
+@@ -7670,6 +7670,7 @@ static struct event_name
      {"BufWritePost",	EVENT_BUFWRITEPOST},
      {"BufWritePre",	EVENT_BUFWRITEPRE},
      {"BufWriteCmd",	EVENT_BUFWRITECMD},
@@ -3911,7 +3911,7 @@ index 19bc97d..eb275ba 100644
          digraph.c
          edit.c
 diff --git a/src/message.c b/src/message.c
-index 7dda6fa..d995761 100644
+index 2982a40..582604c 100644
 --- a/src/message.c
 +++ b/src/message.c
 @@ -2120,6 +2120,11 @@ msg_puts_display(
@@ -3927,7 +3927,7 @@ index 7dda6fa..d995761 100644
  	     * If screen is completely filled and 'more' is set then wait
  	     * for a character.
 diff --git a/src/move.c b/src/move.c
-index 912e51c..bd1c9f9 100644
+index c4f21a7..c7713c1 100644
 --- a/src/move.c
 +++ b/src/move.c
 @@ -136,9 +136,12 @@ redraw_for_cursorline(win_T *wp)
@@ -3966,10 +3966,10 @@ index 912e51c..bd1c9f9 100644
  	redraw_later(SOME_VALID);
  #endif
 diff --git a/src/option.c b/src/option.c
-index 920f163..f6441a8 100644
+index b90d5fd..aa7a5a9 100644
 --- a/src/option.c
 +++ b/src/option.c
-@@ -471,9 +471,10 @@ struct vimoption
+@@ -472,9 +472,10 @@ struct vimoption
  
  /* Make the string as short as possible when compiling with few features. */
  #if defined(FEAT_DIFF) || defined(FEAT_FOLDING) || defined(FEAT_SPELL) \
@@ -3983,7 +3983,7 @@ index 920f163..f6441a8 100644
  #else
  # define HIGHLIGHT_INIT "8:SpecialKey,@:NonText,d:Directory,e:ErrorMsg,i:IncSearch,l:Search,m:MoreMsg,M:ModeMsg,n:LineNr,N:CursorLineNr,r:Question,s:StatusLine,S:StatusLineNC,t:Title,v:Visual,w:WarningMsg,W:WildMenu,>:SignColumn,*:TabLine,#:TabLineSel,_:TabLineFill"
  #endif
-@@ -786,6 +787,31 @@ static struct vimoption options[] =
+@@ -798,6 +799,31 @@ static struct vimoption options[] =
  			    {(char_u *)"", (char_u *)0L}
  #endif
  			    SCRIPTID_INIT},
@@ -4015,7 +4015,7 @@ index 920f163..f6441a8 100644
      {"cmdheight",   "ch",   P_NUM|P_VI_DEF|P_RALL,
  			    (char_u *)&p_ch, PV_NONE,
  			    {(char_u *)1L, (char_u *)0L} SCRIPTID_INIT},
-@@ -3052,6 +3078,9 @@ static struct vimoption options[] =
+@@ -3074,6 +3100,9 @@ static struct vimoption options[] =
  static char *(p_ambw_values[]) = {"single", "double", NULL};
  #endif
  static char *(p_bg_values[]) = {"light", "dark", NULL};
@@ -4025,7 +4025,7 @@ index 920f163..f6441a8 100644
  static char *(p_nf_values[]) = {"bin", "octal", "hex", "alpha", NULL};
  static char *(p_ff_values[]) = {FF_UNIX, FF_DOS, FF_MAC, NULL};
  #ifdef FEAT_CRYPT
-@@ -5988,6 +6017,17 @@ did_set_string_option(
+@@ -6011,6 +6040,17 @@ did_set_string_option(
  	}
      }
  
@@ -4043,7 +4043,7 @@ index 920f163..f6441a8 100644
  #ifdef FEAT_SYN_HL
      /* 'colorcolumn' */
      else if (varp == &curwin->w_p_cc)
-@@ -12069,35 +12109,51 @@ opt_strings_flags(
+@@ -12117,35 +12157,51 @@ opt_strings_flags(
  check_opt_wim(void)
  {
      char_u	new_wim_flags[4];
@@ -4116,7 +4116,7 @@ index 920f163..f6441a8 100644
      }
  
 diff --git a/src/option.h b/src/option.h
-index 13acabf..d7f7081 100644
+index 62e66cd..e302047 100644
 --- a/src/option.h
 +++ b/src/option.h
 @@ -294,6 +294,7 @@
@@ -4190,7 +4190,7 @@ index 58b635b..19b44d6 100644
 +void clpum_compl_check_keys(int frequency);
  /* vim: set ft=c : */
 diff --git a/src/screen.c b/src/screen.c
-index 016e7ee..3e6209c 100644
+index e37bf48..c76138c 100644
 --- a/src/screen.c
 +++ b/src/screen.c
 @@ -728,6 +728,11 @@ update_screen(int type)
@@ -4205,7 +4205,7 @@ index 016e7ee..3e6209c 100644
  
  #ifdef FEAT_WINDOWS
      /* Reset b_mod_set flags.  Going through all windows is probably faster
-@@ -6688,6 +6693,11 @@ win_redr_status(win_T *wp)
+@@ -6692,6 +6697,11 @@ win_redr_status(win_T *wp)
  	     * drawn over it */
  	    || pum_visible()
  #endif
@@ -4217,7 +4217,7 @@ index 016e7ee..3e6209c 100644
  	    )
      {
  	/* Don't redraw right now, do it later. */
-@@ -10057,7 +10067,12 @@ showmode(void)
+@@ -10061,7 +10071,12 @@ showmode(void)
      do_mode = ((p_smd && msg_silent == 0)
  	    && ((State & INSERT)
  		|| restart_edit
@@ -4231,7 +4231,7 @@ index 016e7ee..3e6209c 100644
      if (do_mode || Recording)
      {
  	/*
-@@ -10115,7 +10130,7 @@ showmode(void)
+@@ -10119,7 +10134,7 @@ showmode(void)
  		}
  	    }
  #endif
@@ -4240,7 +4240,7 @@ index 016e7ee..3e6209c 100644
  	    /* CTRL-X in Insert mode */
  	    if (edit_submode != NULL && !shortmess(SHM_COMPLETIONMENU))
  	    {
-@@ -10591,8 +10606,14 @@ showruler(int always)
+@@ -10595,8 +10610,14 @@ showruler(int always)
  {
      if (!always && !redrawing())
  	return;
@@ -4256,7 +4256,7 @@ index 016e7ee..3e6209c 100644
      {
  # ifdef FEAT_WINDOWS
  	/* Don't redraw right now, do it later. */
-@@ -10600,7 +10621,7 @@ showruler(int always)
+@@ -10604,7 +10625,7 @@ showruler(int always)
  # endif
  	return;
      }
@@ -4265,7 +4265,7 @@ index 016e7ee..3e6209c 100644
  #if defined(FEAT_STL_OPT) && defined(FEAT_WINDOWS)
      if ((*p_stl != NUL || *curwin->w_p_stl != NUL) && curwin->w_status_height)
      {
-@@ -10677,6 +10698,12 @@ win_redr_ruler(win_T *wp, int always)
+@@ -10681,6 +10702,12 @@ win_redr_ruler(win_T *wp, int always)
      if (pum_visible())
  	return;
  #endif
@@ -4279,10 +4279,10 @@ index 016e7ee..3e6209c 100644
  #ifdef FEAT_STL_OPT
      if (*p_ruf)
 diff --git a/src/syntax.c b/src/syntax.c
-index bc5c9b7..5ec2523 100644
+index dbadb70..f49a26d 100644
 --- a/src/syntax.c
 +++ b/src/syntax.c
-@@ -6834,6 +6834,10 @@ static char *(highlight_init_both[]) =
+@@ -6874,6 +6874,10 @@ static char *(highlight_init_both[]) =
  	CENT("PmenuSbar ctermbg=Grey",
  	     "PmenuSbar ctermbg=Grey guibg=Grey"),
  #endif
@@ -4293,7 +4293,7 @@ index bc5c9b7..5ec2523 100644
  #ifdef FEAT_WINDOWS
  	CENT("TabLineSel term=bold cterm=bold",
  	     "TabLineSel term=bold cterm=bold gui=bold"),
-@@ -6879,6 +6883,14 @@ static char *(highlight_init_light[]) =
+@@ -6919,6 +6923,14 @@ static char *(highlight_init_light[]) =
  	CENT("PmenuSel ctermbg=LightGrey ctermfg=Black",
  	     "PmenuSel ctermbg=LightGrey ctermfg=Black guibg=Grey"),
  #endif
@@ -4308,7 +4308,7 @@ index bc5c9b7..5ec2523 100644
  	CENT("SpecialKey term=bold ctermfg=DarkBlue",
  	     "SpecialKey term=bold ctermfg=DarkBlue guifg=Blue"),
  	CENT("Title term=bold ctermfg=DarkMagenta",
-@@ -6969,6 +6981,14 @@ static char *(highlight_init_dark[]) =
+@@ -7009,6 +7021,14 @@ static char *(highlight_init_dark[]) =
  	CENT("PmenuSel ctermbg=Black ctermfg=DarkGrey",
  	     "PmenuSel ctermbg=Black ctermfg=DarkGrey guibg=DarkGrey"),
  #endif
@@ -4324,10 +4324,10 @@ index bc5c9b7..5ec2523 100644
  	     "Title term=bold ctermfg=LightMagenta gui=bold guifg=Magenta"),
  	CENT("WarningMsg term=standout ctermfg=LightRed",
 diff --git a/src/term.c b/src/term.c
-index 65b86b2..5322093 100644
+index f65a15b..99100b2 100644
 --- a/src/term.c
 +++ b/src/term.c
-@@ -3049,8 +3049,19 @@ set_shellsize(int width, int height, int mustset)
+@@ -3057,8 +3057,19 @@ set_shellsize(int width, int height, int mustset)
  #endif
  	    if (State & CMDLINE)
  	    {
@@ -4350,17 +4350,17 @@ index 65b86b2..5322093 100644
  	    else
  	    {
 diff --git a/src/testdir/Make_all.mak b/src/testdir/Make_all.mak
-index 63a1b05..49d6118 100644
+index 12abb78..7581d62 100644
 --- a/src/testdir/Make_all.mak
 +++ b/src/testdir/Make_all.mak
-@@ -143,6 +143,7 @@ NEW_TESTS = test_arglist.res \
+@@ -142,6 +142,7 @@ NEW_TESTS = test_arglist.res \
  	    test_cdo.res \
  	    test_channel.res \
  	    test_charsearch.res \
 +	    test_clpum.res \
  	    test_cmdline.res \
+ 	    test_command_count.res \
  	    test_crypt.res \
- 	    test_cscope.res \
 diff --git a/src/testdir/test_clpum.vim b/src/testdir/test_clpum.vim
 new file mode 100644
 index 0000000..c06037e
@@ -4379,7 +4379,7 @@ index 0000000..c06037e
 +
 +" vim: sw=2 et
 diff --git a/src/version.c b/src/version.c
-index 9b0809b..43f92a1 100644
+index d3dc088..f4e8378 100644
 --- a/src/version.c
 +++ b/src/version.c
 @@ -127,6 +127,11 @@ static char *(features[]) =
@@ -4395,10 +4395,10 @@ index 9b0809b..43f92a1 100644
  	"+cmdline_compl",
  #else
 diff --git a/src/vim.h b/src/vim.h
-index ef75ea2..30d5c84 100644
+index abee386..4b0f91d 100644
 --- a/src/vim.h
 +++ b/src/vim.h
-@@ -1291,6 +1291,7 @@ enum auto_event
+@@ -1293,6 +1293,7 @@ enum auto_event
      EVENT_BUFWRITEPOST,		/* after writing a buffer */
      EVENT_BUFWRITEPRE,		/* before writing a buffer */
      EVENT_BUFWRITECMD,		/* write buffer using command */
@@ -4406,7 +4406,7 @@ index ef75ea2..30d5c84 100644
      EVENT_CMDWINENTER,		/* after entering the cmdline window */
      EVENT_CMDWINLEAVE,		/* before leaving the cmdline window */
      EVENT_COLORSCHEME,		/* after loading a colorscheme */
-@@ -1410,6 +1411,10 @@ typedef enum
+@@ -1412,6 +1413,10 @@ typedef enum
      , HLF_PSI	    /* popup menu selected item */
      , HLF_PSB	    /* popup menu scrollbar */
      , HLF_PST	    /* popup menu scrollbar thumb */
@@ -4417,7 +4417,7 @@ index ef75ea2..30d5c84 100644
      , HLF_TP	    /* tabpage line */
      , HLF_TPS	    /* tabpage line selected */
      , HLF_TPF	    /* tabpage line filler */
-@@ -1425,7 +1430,8 @@ typedef enum
+@@ -1427,7 +1432,8 @@ typedef enum
  		  'n', 'N', 'r', 's', 'S', 'c', 't', 'v', 'V', 'w', 'W', \
  		  'f', 'F', 'A', 'C', 'D', 'T', '-', '>', \
  		  'B', 'P', 'R', 'L', \
@@ -4427,7 +4427,7 @@ index ef75ea2..30d5c84 100644
  
  /*
   * Boolean constants
-@@ -2002,7 +2008,8 @@ typedef int sock_T;
+@@ -1997,7 +2003,8 @@ typedef int sock_T;
  #define VV_TYPE_NONE	78
  #define VV_TYPE_JOB	79
  #define VV_TYPE_CHANNEL	80
@@ -4437,4 +4437,3 @@ index ef75ea2..30d5c84 100644
  
  /* used for v_number in VAR_SPECIAL */
  #define VVAL_FALSE	0L
-0
